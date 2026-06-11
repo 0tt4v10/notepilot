@@ -31,11 +31,17 @@ cd NotePilot
 npm install
 ```
 
-3. Lege deinen Claude API-Schlüssel in einer `.env` Datei ab (siehe `.env.example`):
+3. Der KI-Assistent nutzt [Ollama](https://ollama.com/) lokal – kein API-Schlüssel nötig:
+```bash
+ollama pull llama3.1
+ollama serve
+```
+Damit der Browser auf Ollama zugreifen darf, CORS erlauben (z. B. Umgebungsvariable `OLLAMA_ORIGINS=http://localhost:3000` setzen, bevor `ollama serve` läuft).
+
+4. Optional: `.env` Datei anpassen (siehe `.env.example`), falls Ollama nicht auf `http://localhost:11434` läuft oder ein anderes Modell genutzt werden soll:
 ```bash
 cp .env.example .env
 ```
-Trage anschließend deinen Schlüssel als `VITE_ANTHROPIC_API_KEY` in der `.env` Datei ein. Diese Datei wird nicht eingecheckt.
 
 ## 🚀 Schnellstart
 

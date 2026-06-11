@@ -1,30 +1,26 @@
-async function post(messages: { role: 'user' | 'assistant'; content: string }[], system: string): Promise<string> {
-  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
-  if (!apiKey) throw new Error('Kein API-Schlüssel. Bitte VITE_ANTHROPIC_API_KEY in der .env Datei hinterlegen.');
+const OLLAMA_URL = import.meta.env.VITE_OLLAMA_URL || 'http://localhost:11434';
+const OLLAMA_MODEL = import.meta.env.VITE_OLLAMA_MODEL || 'llama3.1';
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+async function post(messages: { role: 'user' | 'assistant'; content: string }[], system: string): Promise<string> {
+  const res = await fetch(`${OLLAMA_URL}/api/chat`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-allow-browser': 'true',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 2048,
-      system,
-      messages,
+      model: OLLAMA_MODEL,
+      stream: false,
+      messages: [{ role: 'system', content: system }, ...messages],
     }),
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({})) as { error?: { message?: string } };
-    throw new Error(err?.error?.message ?? `API-Fehler ${res.status}`);
+    const err = await res.json().catch(() => ({})) as { error?: string };
+    throw new Error(err?.error ?? `Ollama-Fehler ${res.status}`);
   }
 
-  const data = await res.json() as { content: { text: string }[] };
-  return data.content[0]?.text ?? '';
+  const data = await res.json() as { message: { content: string } };
+  return data.message?.content ?? '';
 }
 
 const BASE_SYSTEM = `Du bist NotePilot, ein intelligenter Lernassistent.
