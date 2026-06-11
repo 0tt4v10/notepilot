@@ -1,11 +1,6 @@
-const STORAGE_KEY = 'notepilot_api_key';
-
-export const getApiKey = (): string => localStorage.getItem(STORAGE_KEY) ?? '';
-export const saveApiKey = (key: string): void => localStorage.setItem(STORAGE_KEY, key);
-
 async function post(messages: { role: 'user' | 'assistant'; content: string }[], system: string): Promise<string> {
-  const apiKey = getApiKey();
-  if (!apiKey) throw new Error('Kein API-Schlüssel. Bitte in den Einstellungen hinterlegen.');
+  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error('Kein API-Schlüssel. Bitte VITE_ANTHROPIC_API_KEY in der .env Datei hinterlegen.');
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',

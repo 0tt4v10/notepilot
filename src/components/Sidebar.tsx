@@ -49,6 +49,17 @@ export default function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
       <div className="p-4 border-t border-slate-200">
         <div className="text-xs text-slate-500 text-center">
           <p>NotePilot v1.0</p>
+          <a
+            href="https://github.com"
+            className="inline-flex items-center gap-1 mt-1.5 px-2 py-1 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors text-xs font-medium"
+            title="Browser-Extension für OneNote Web"
+            onClick={e => e.preventDefault()}
+          >
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+            </svg>
+            Add-on
+          </a>
         </div>
       </div>
     </aside>

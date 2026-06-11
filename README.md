@@ -31,6 +31,12 @@ cd NotePilot
 npm install
 ```
 
+3. Lege deinen Claude API-Schlüssel in einer `.env` Datei ab (siehe `.env.example`):
+```bash
+cp .env.example .env
+```
+Trage anschließend deinen Schlüssel als `VITE_ANTHROPIC_API_KEY` in der `.env` Datei ein. Diese Datei wird nicht eingecheckt.
+
 ## 🚀 Schnellstart
 
 ### Entwicklungsserver starten:
