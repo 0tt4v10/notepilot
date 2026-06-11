@@ -7,9 +7,24 @@ interface Msg {
   content: string;
 }
 
+const STORAGE_KEY = 'notepilot-popup-chat';
+
+function loadMsgs(): Msg[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch {
+    // ignore corrupted storage
+  }
+  return [];
+}
+
 export default function AiChatPopup() {
   const [open, setOpen] = useState(false);
-  const [msgs, setMsgs] = useState<Msg[]>([]);
+  const [msgs, setMsgs] = useState<Msg[]>(loadMsgs);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -19,6 +34,11 @@ export default function AiChatPopup() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [msgs, loading]);
+
+  // Persist chat history so it survives page switches and reloads
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs));
+  }, [msgs]);
 
   useEffect(() => {
     if (open) setTimeout(() => inputRef.current?.focus(), 50);

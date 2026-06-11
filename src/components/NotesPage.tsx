@@ -46,6 +46,21 @@ const DEFAULT_NOTEBOOKS: Notebook[] = [
   },
 ];
 
+const STORAGE_KEY = 'notepilot-notebooks';
+
+function loadNotebooks(): Notebook[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch {
+    // ignore corrupted storage
+  }
+  return DEFAULT_NOTEBOOKS;
+}
+
 function now() { return new Date().toISOString().slice(0, 10); }
 
 function countReplacementChars(s: string): number {
@@ -92,10 +107,10 @@ function parseOneNoteHtml(html: string): { title: string; content: string } {
 }
 
 export default function NotesPage() {
-  const [notebooks, setNotebooks] = useState<Notebook[]>(DEFAULT_NOTEBOOKS);
-  const [selNb, setSelNb] = useState<Notebook>(DEFAULT_NOTEBOOKS[0]);
-  const [selSec, setSelSec] = useState<Section>(DEFAULT_NOTEBOOKS[0].sections[0]);
-  const [selPage, setSelPage] = useState<Page>(DEFAULT_NOTEBOOKS[0].sections[0].pages[0]);
+  const [notebooks, setNotebooks] = useState<Notebook[]>(loadNotebooks);
+  const [selNb, setSelNb] = useState<Notebook>(notebooks[0]);
+  const [selSec, setSelSec] = useState<Section>(notebooks[0].sections[0]);
+  const [selPage, setSelPage] = useState<Page>(notebooks[0].sections[0].pages[0]);
   const [pageTitle, setPageTitle] = useState(selPage.title);
   const [importError, setImportError] = useState('');
   const editorRef = useRef<HTMLDivElement>(null);
@@ -108,6 +123,11 @@ export default function NotesPage() {
       editorRef.current.innerHTML = selPage.content;
     }
   }, [selPage.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Persist notebooks so notes survive page switches and reloads
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(notebooks));
+  }, [notebooks]);
 
   const syncPage = useCallback((updates: Partial<Page>) => {
     setNotebooks(prev => prev.map(nb =>

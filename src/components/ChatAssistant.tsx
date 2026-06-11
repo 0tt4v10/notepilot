@@ -9,15 +9,32 @@ interface Message {
   timestamp: Date;
 }
 
+const STORAGE_KEY = 'notepilot-chat-messages';
+
+const DEFAULT_MESSAGE: Message = {
+  id: '1',
+  text: 'Hallo! Ich bin Ihr NotePilot KI-Assistent. Wie kann ich dir heute beim Lernen helfen?',
+  sender: 'assistant',
+  timestamp: new Date(),
+};
+
+function loadMessages(): Message[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as (Omit<Message, 'timestamp'> & { timestamp: string })[];
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map(m => ({ ...m, timestamp: new Date(m.timestamp) }));
+      }
+    }
+  } catch {
+    // ignore corrupted storage
+  }
+  return [DEFAULT_MESSAGE];
+}
+
 export default function ChatAssistant() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      text: 'Hallo! Ich bin Ihr NotePilot KI-Assistent. Wie kann ich dir heute beim Lernen helfen?',
-      sender: 'assistant',
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>(loadMessages);
 
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -30,6 +47,11 @@ export default function ChatAssistant() {
 
   useEffect(() => {
     scrollToBottom();
+  }, [messages]);
+
+  // Persist chat history so it survives switching pages and reloads
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
   }, [messages]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
