@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, MessageCircle, Loader } from 'lucide-react';
+import { chat } from '../services/aiService';
 
 interface Message {
   id: string;
@@ -20,6 +21,7 @@ export default function ChatAssistant() {
 
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -30,10 +32,10 @@ export default function ChatAssistant() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || isLoading) return;
 
     // Add user message
     const userMessage: Message = {
@@ -43,32 +45,25 @@ export default function ChatAssistant() {
       timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    const nextMessages = [...messages, userMessage];
+    setMessages(nextMessages);
     setInputValue('');
     setIsLoading(true);
+    setError('');
 
-    // Simulate assistant response
-    setTimeout(() => {
-      const responses = [
-        'Das ist eine großartige Frage! Lassen Sie mich einen Moment Zeit nehmen, um Ihnen eine detaillierte Antwort zu geben.',
-        'Basierend auf Ihren bisherigen Lernaktivitäten kann ich sagen, dass Sie auf dem richtigen Weg sind.',
-        'Möchten Sie, dass ich Ihnen eine Zusammenfassung zu diesem Thema erstelle?',
-        'Das ist ein wichtiges Konzept. Können Sie mir mehr darüber erzählen, wie Sie dieses Thema verstehen?',
-        'Ich empfehle, sich zuerst die Grundkonzepte anzuschauen, bevor Sie zu fortgeschritteneren Themen übergehen.',
-      ];
-
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-
-      const assistantMessage: Message = {
+    try {
+      const reply = await chat('', nextMessages.map(m => ({ role: m.sender, content: m.text })));
+      setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
-        text: randomResponse,
+        text: reply,
         sender: 'assistant',
         timestamp: new Date(),
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
+      }]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Fehler bei der Anfrage.');
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -134,6 +129,10 @@ export default function ChatAssistant() {
               <p className="text-sm">Der Assistent schreibt...</p>
             </div>
           </div>
+        )}
+
+        {error && (
+          <div className="text-sm text-red-500 bg-red-50 rounded-lg px-4 py-3">{error}</div>
         )}
 
         <div ref={messagesEndRef} />
