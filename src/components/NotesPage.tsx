@@ -116,6 +116,7 @@ export default function NotesPage() {
   const [selPage, setSelPage] = useState<Page>(notebooks[0].sections[0].pages[0]);
   const [pageTitle, setPageTitle] = useState(selPage.title);
   const [importError, setImportError] = useState('');
+  const [colorPickerOpen, setColorPickerOpen] = useState<'text' | 'highlight' | null>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -489,31 +490,45 @@ export default function NotesPage() {
           <div className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1" />
 
           {/* Text color */}
-          <div className="relative group">
-            <button className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition flex items-center gap-0.5 text-xs font-bold" title="Textfarbe">
+          <div className="relative">
+            <button
+              onMouseDown={e => { e.preventDefault(); setColorPickerOpen(o => o === 'text' ? null : 'text'); }}
+              title="Textfarbe"
+              className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition flex items-center gap-0.5 text-xs font-bold"
+            >
               A<span className="w-3 h-1 rounded-sm bg-red-500 block" />
             </button>
-            <div className="absolute top-8 left-0 z-20 hidden group-hover:flex flex-wrap gap-1 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg w-28">
-              {TEXT_COLORS.map(c => (
-                <button key={c} onMouseDown={e => { e.preventDefault(); exec('foreColor', c); }}
-                  className="w-5 h-5 rounded-full border border-slate-300 hover:scale-125 transition-transform"
-                  style={{ backgroundColor: c }} title={c} />
-              ))}
-            </div>
+            {colorPickerOpen === 'text' && (
+              <div className="absolute top-9 left-0 z-30 flex flex-wrap gap-1 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl w-28">
+                {TEXT_COLORS.map(c => (
+                  <button key={c}
+                    onMouseDown={e => { e.preventDefault(); exec('foreColor', c); setColorPickerOpen(null); }}
+                    className="w-6 h-6 rounded-full border-2 border-slate-300 hover:scale-125 transition-transform"
+                    style={{ backgroundColor: c }} />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Highlight */}
-          <div className="relative group">
-            <button className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Markieren">
+          <div className="relative">
+            <button
+              onMouseDown={e => { e.preventDefault(); setColorPickerOpen(o => o === 'highlight' ? null : 'highlight'); }}
+              title="Markieren"
+              className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition"
+            >
               <Highlighter size={15} />
             </button>
-            <div className="absolute top-8 left-0 z-20 hidden group-hover:flex flex-wrap gap-1 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg w-24">
-              {HIGHLIGHT_COLORS.map(c => (
-                <button key={c} onMouseDown={e => { e.preventDefault(); exec('hiliteColor', c); }}
-                  className="w-5 h-5 rounded border border-slate-300 hover:scale-125 transition-transform"
-                  style={{ backgroundColor: c }} title={c} />
-              ))}
-            </div>
+            {colorPickerOpen === 'highlight' && (
+              <div className="absolute top-9 left-0 z-30 flex flex-wrap gap-1 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl w-24">
+                {HIGHLIGHT_COLORS.map(c => (
+                  <button key={c}
+                    onMouseDown={e => { e.preventDefault(); exec('hiliteColor', c); setColorPickerOpen(null); }}
+                    className="w-6 h-6 rounded border-2 border-slate-300 hover:scale-125 transition-transform"
+                    style={{ backgroundColor: c }} />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
