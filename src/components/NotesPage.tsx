@@ -1,8 +1,9 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
-  BookOpen, Plus, Trash2, Bold, Italic, Underline,
-  List, ListOrdered, Type, ChevronRight, FileText,
-  Upload,
+  BookOpen, Plus, Trash2, Bold, Italic, Underline, Strikethrough,
+  List, ListOrdered, Type, ChevronRight, FileText, Upload,
+  AlignLeft, AlignCenter, AlignRight, AlignJustify,
+  Undo2, Redo2, Highlighter,
 } from 'lucide-react';
 import mammoth from 'mammoth';
 import { useLanguage } from '../LanguageContext';
@@ -293,10 +294,14 @@ export default function NotesPage() {
     createNoteFromImport(title, content, file.name);
   };
 
+  const TEXT_COLORS = ['#000000','#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#8b5cf6','#ec4899','#ffffff'];
+  const HIGHLIGHT_COLORS = ['#fef08a','#bbf7d0','#bfdbfe','#fecaca','#e9d5ff','#fed7aa'];
+
   const TOOLBAR = [
     { icon: Bold, cmd: 'bold', title: 'Fett' },
     { icon: Italic, cmd: 'italic', title: 'Kursiv' },
     { icon: Underline, cmd: 'underline', title: 'Unterstrichen' },
+    { icon: Strikethrough, cmd: 'strikeThrough', title: 'Durchgestrichen' },
   ];
 
   return (
@@ -418,37 +423,98 @@ export default function NotesPage() {
           <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{t.notes_last_edited} {selPage.updatedAt}</p>
         </div>
 
-        <div className="px-6 py-2 border-y border-slate-100 dark:border-slate-700 flex items-center gap-1 flex-wrap">
+        <div className="px-4 py-1.5 border-y border-slate-100 dark:border-slate-700 flex items-center gap-0.5 flex-wrap bg-slate-50 dark:bg-slate-800">
+          {/* Undo / Redo */}
+          <button onMouseDown={e => { e.preventDefault(); exec('undo'); }} title="Rückgängig" className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition"><Undo2 size={15} /></button>
+          <button onMouseDown={e => { e.preventDefault(); exec('redo'); }} title="Wiederholen" className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition"><Redo2 size={15} /></button>
+
+          <div className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1" />
+
+          {/* Font size */}
+          <select
+            onMouseDown={e => e.stopPropagation()}
+            onChange={e => { exec('fontSize', e.target.value); e.target.value = ''; }}
+            defaultValue=""
+            className="text-xs px-1 py-1 rounded border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 cursor-pointer"
+            title="Schriftgrösse"
+          >
+            <option value="" disabled>Grösse</option>
+            <option value="1">Klein (8pt)</option>
+            <option value="2">Klein (10pt)</option>
+            <option value="3">Normal (12pt)</option>
+            <option value="4">Mittel (14pt)</option>
+            <option value="5">Gross (18pt)</option>
+            <option value="6">Sehr gross (24pt)</option>
+            <option value="7">Riesig (36pt)</option>
+          </select>
+
+          <div className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1" />
+
+          {/* Bold / Italic / Underline / Strikethrough */}
           {TOOLBAR.map(({ icon: Icon, cmd, title }) => (
-            <button
-              key={cmd}
-              onMouseDown={e => { e.preventDefault(); exec(cmd); }}
-              title={title}
-              className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition"
-            >
-              <Icon size={16} />
+            <button key={cmd} onMouseDown={e => { e.preventDefault(); exec(cmd); }} title={title}
+              className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
+              <Icon size={15} />
             </button>
           ))}
+
           <div className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1" />
+
+          {/* Headings */}
           {(['h1', 'h2', 'h3'] as const).map(tag => (
-            <button
-              key={tag}
-              onMouseDown={e => { e.preventDefault(); exec('formatBlock', tag); }}
-              className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition text-xs font-bold uppercase"
-            >
+            <button key={tag} onMouseDown={e => { e.preventDefault(); exec('formatBlock', tag); }}
+              className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition text-xs font-bold uppercase">
               {tag}
             </button>
           ))}
-          <button onMouseDown={e => { e.preventDefault(); exec('formatBlock', 'p'); }} title="Normal" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
-            <Type size={16} />
+          <button onMouseDown={e => { e.preventDefault(); exec('formatBlock', 'p'); }} title="Normal"
+            className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
+            <Type size={15} />
           </button>
+
           <div className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1" />
-          <button onMouseDown={e => { e.preventDefault(); exec('insertUnorderedList'); }} title="Aufzählung" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
-            <List size={16} />
-          </button>
-          <button onMouseDown={e => { e.preventDefault(); exec('insertOrderedList'); }} title="Nummerierung" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
-            <ListOrdered size={16} />
-          </button>
+
+          {/* Alignment */}
+          <button onMouseDown={e => { e.preventDefault(); exec('justifyLeft'); }} title="Links" className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition"><AlignLeft size={15} /></button>
+          <button onMouseDown={e => { e.preventDefault(); exec('justifyCenter'); }} title="Zentriert" className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition"><AlignCenter size={15} /></button>
+          <button onMouseDown={e => { e.preventDefault(); exec('justifyRight'); }} title="Rechts" className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition"><AlignRight size={15} /></button>
+          <button onMouseDown={e => { e.preventDefault(); exec('justifyFull'); }} title="Blocksatz" className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition"><AlignJustify size={15} /></button>
+
+          <div className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1" />
+
+          {/* Lists */}
+          <button onMouseDown={e => { e.preventDefault(); exec('insertUnorderedList'); }} title="Aufzählung" className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition"><List size={15} /></button>
+          <button onMouseDown={e => { e.preventDefault(); exec('insertOrderedList'); }} title="Nummerierung" className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition"><ListOrdered size={15} /></button>
+
+          <div className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1" />
+
+          {/* Text color */}
+          <div className="relative group">
+            <button className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition flex items-center gap-0.5 text-xs font-bold" title="Textfarbe">
+              A<span className="w-3 h-1 rounded-sm bg-red-500 block" />
+            </button>
+            <div className="absolute top-8 left-0 z-20 hidden group-hover:flex flex-wrap gap-1 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg w-28">
+              {TEXT_COLORS.map(c => (
+                <button key={c} onMouseDown={e => { e.preventDefault(); exec('foreColor', c); }}
+                  className="w-5 h-5 rounded-full border border-slate-300 hover:scale-125 transition-transform"
+                  style={{ backgroundColor: c }} title={c} />
+              ))}
+            </div>
+          </div>
+
+          {/* Highlight */}
+          <div className="relative group">
+            <button className="p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition" title="Markieren">
+              <Highlighter size={15} />
+            </button>
+            <div className="absolute top-8 left-0 z-20 hidden group-hover:flex flex-wrap gap-1 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg w-24">
+              {HIGHLIGHT_COLORS.map(c => (
+                <button key={c} onMouseDown={e => { e.preventDefault(); exec('hiliteColor', c); }}
+                  className="w-5 h-5 rounded border border-slate-300 hover:scale-125 transition-transform"
+                  style={{ backgroundColor: c }} title={c} />
+              ))}
+            </div>
+          </div>
         </div>
 
         <div
