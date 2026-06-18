@@ -3,9 +3,9 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: 'GEMINI_API_KEY not configured on server' });
+    return res.status(500).json({ error: 'GROQ_API_KEY not configured on server' });
   }
 
   const { messages, system } = req.body as {
@@ -13,24 +13,21 @@ export default async function handler(req: any, res: any) {
     system: string;
   };
 
-  // Convert messages to Gemini format (assistant → model)
-  const contents = messages.map(m => ({
-    role: m.role === 'assistant' ? 'model' : 'user',
-    parts: [{ text: m.content }],
-  }));
-
-  const upstream = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: system }] },
-        contents,
-        generationConfig: { maxOutputTokens: 1024 },
-      }),
-    }
-  );
+  const upstream = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'authorization': `Bearer ${apiKey}`,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'llama-3.1-8b-instant',
+      max_tokens: 1024,
+      messages: [
+        { role: 'system', content: system },
+        ...messages,
+      ],
+    }),
+  });
 
   const data = await upstream.json() as any;
 
@@ -40,6 +37,6 @@ export default async function handler(req: any, res: any) {
   }
 
   // Normalize to Anthropic-style response so aiService.ts needs no changes
-  const text: string = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+  const text: string = data.choices?.[0]?.message?.content ?? '';
   return res.status(200).json({ content: [{ text }] });
 }
