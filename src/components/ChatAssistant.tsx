@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, MessageCircle, Loader } from 'lucide-react';
+import { Send, MessageCircle, Loader, Trash2 } from 'lucide-react';
 import { chat } from '../services/aiService';
 import { useLanguage } from '../LanguageContext';
 
@@ -78,12 +78,25 @@ export default function ChatAssistant() {
   return (
     <div className="flex-1 flex flex-col bg-white dark:bg-slate-900">
       <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 shadow">
-        <div className="flex items-center gap-3">
-          <MessageCircle size={28} />
-          <div>
-            <h2 className="text-2xl font-bold">{t.chat_title}</h2>
-            <p className="text-blue-100 text-sm">{t.chat_subtitle}</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <MessageCircle size={28} />
+            <div>
+              <h2 className="text-2xl font-bold">{t.chat_title}</h2>
+              <p className="text-blue-100 text-sm">{t.chat_subtitle}</p>
+            </div>
           </div>
+          <button
+            onClick={() => {
+              const welcome = { id: '1', text: t.chat_welcome, sender: 'assistant' as const, timestamp: new Date() };
+              setMessages([welcome]);
+              localStorage.removeItem(STORAGE_KEY);
+            }}
+            title="Chat leeren"
+            className="p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition"
+          >
+            <Trash2 size={20} />
+          </button>
         </div>
       </div>
 
