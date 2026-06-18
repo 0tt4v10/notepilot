@@ -298,7 +298,7 @@ export default function NotesPage() {
   ];
 
   return (
-    <div className="flex h-full bg-white">
+    <div className="flex h-full bg-white dark:bg-slate-900">
       <input
         ref={fileInputRef}
         type="file"
@@ -308,10 +308,10 @@ export default function NotesPage() {
       />
 
       {/* Notebooks panel */}
-      <div className="w-52 border-r border-slate-200 flex flex-col bg-slate-50 flex-shrink-0">
-        <div className="p-3 border-b border-slate-200 flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Notizbücher</span>
-          <button onClick={addNotebook} className="p-1 rounded hover:bg-slate-200 text-slate-500" title="Neu">
+      <div className="w-52 border-r border-slate-200 dark:border-slate-700 flex flex-col bg-slate-50 dark:bg-slate-800 flex-shrink-0">
+        <div className="p-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Notizbücher</span>
+          <button onClick={addNotebook} className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400" title="Neu">
             <Plus size={15} />
           </button>
         </div>
@@ -321,14 +321,14 @@ export default function NotesPage() {
             <div key={nb.id}>
               <div className="px-3 py-2 flex items-center gap-2">
                 <BookOpen size={13} className="text-blue-500 flex-shrink-0" />
-                <span className="text-sm font-semibold text-slate-700 truncate">{nb.name}</span>
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">{nb.name}</span>
               </div>
               {nb.sections.map(sec => (
                 <button
                   key={sec.id}
                   onClick={() => selectSection(nb, sec)}
                   className={`w-full pl-7 pr-3 py-1.5 flex items-center gap-2 text-left transition-colors ${
-                    selSec.id === sec.id ? 'bg-blue-100 text-blue-700' : 'text-slate-600 hover:bg-slate-100'
+                    selSec.id === sec.id ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                   }`}
                 >
                   <span className={`w-2.5 h-2.5 rounded-sm flex-shrink-0 ${sec.color}`} />
@@ -339,21 +339,21 @@ export default function NotesPage() {
           ))}
         </div>
 
-        <div className="p-2 border-t border-slate-200 space-y-1">
+        <div className="p-2 border-t border-slate-200 dark:border-slate-700 space-y-1">
           {importError && (
-            <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-2 py-1.5 leading-snug">
+            <div className="text-xs text-red-600 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg px-2 py-1.5 leading-snug">
               {importError}
             </div>
           )}
           <button
             onClick={() => { setImportError(''); fileInputRef.current?.click(); }}
-            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg hover:bg-green-100 transition font-medium"
+            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/40 transition font-medium"
           >
             <Upload size={13} /> OneNote importieren
           </button>
           <button
             onClick={addSection}
-            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition"
+            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition"
           >
             <Plus size={13} /> Abschnitt
           </button>
@@ -361,29 +361,29 @@ export default function NotesPage() {
       </div>
 
       {/* Pages panel */}
-      <div className="w-44 border-r border-slate-200 flex flex-col bg-white flex-shrink-0">
-        <div className="p-3 border-b border-slate-200 flex items-center justify-between">
+      <div className="w-44 border-r border-slate-200 dark:border-slate-700 flex flex-col bg-white dark:bg-slate-850 flex-shrink-0" style={{backgroundColor: 'inherit'}}>
+        <div className="p-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between bg-white dark:bg-slate-900">
           <div className="flex items-center gap-1.5 min-w-0">
             <span className={`w-2.5 h-2.5 rounded-sm flex-shrink-0 ${selSec.color}`} />
-            <span className="text-xs font-semibold text-slate-700 truncate">{selSec.name}</span>
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{selSec.name}</span>
           </div>
-          <button onClick={addPage} className="p-1 rounded hover:bg-slate-100 text-slate-500" title="Seite hinzufügen">
+          <button onClick={addPage} className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400" title="Seite hinzufügen">
             <Plus size={15} />
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto py-1">
+        <div className="flex-1 overflow-y-auto py-1 bg-white dark:bg-slate-900">
           {selSec.pages.map(pg => (
             <div
               key={pg.id}
               onClick={() => selectPage(pg)}
               className={`group flex items-center px-3 py-2 cursor-pointer transition-colors ${
                 selPage.id === pg.id
-                  ? 'bg-blue-50 border-l-2 border-blue-500'
-                  : 'hover:bg-slate-50 border-l-2 border-transparent'
+                  ? 'bg-blue-50 dark:bg-blue-900/30 border-l-2 border-blue-500'
+                  : 'hover:bg-slate-50 dark:hover:bg-slate-800 border-l-2 border-transparent'
               }`}
             >
               <FileText size={12} className="text-slate-400 flex-shrink-0 mr-2" />
-              <span className="text-xs text-slate-700 flex-1 truncate">{pg.title}</span>
+              <span className="text-xs text-slate-700 dark:text-slate-300 flex-1 truncate">{pg.title}</span>
               {selSec.pages.length > 1 && (
                 <button
                   onClick={e => { e.stopPropagation(); deletePage(pg.id); }}
@@ -398,8 +398,8 @@ export default function NotesPage() {
       </div>
 
       {/* Editor */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <div className="px-6 pt-4 pb-2 flex items-center gap-1 text-xs text-slate-400">
+      <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-slate-900">
+        <div className="px-6 pt-4 pb-2 flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
           <span>{selNb.name}</span>
           <ChevronRight size={12} />
           <span>{selSec.name}</span>
@@ -411,40 +411,40 @@ export default function NotesPage() {
             onChange={e => setPageTitle(e.target.value)}
             onBlur={handleTitleBlur}
             placeholder="Seitentitel..."
-            className="w-full text-3xl font-bold text-slate-900 border-none outline-none bg-transparent placeholder-slate-300"
+            className="w-full text-3xl font-bold text-slate-900 dark:text-slate-100 border-none outline-none bg-transparent placeholder-slate-300 dark:placeholder-slate-600"
           />
-          <p className="text-xs text-slate-400 mt-1">Zuletzt bearbeitet: {selPage.updatedAt}</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Zuletzt bearbeitet: {selPage.updatedAt}</p>
         </div>
 
-        <div className="px-6 py-2 border-y border-slate-100 flex items-center gap-1 flex-wrap">
+        <div className="px-6 py-2 border-y border-slate-100 dark:border-slate-700 flex items-center gap-1 flex-wrap">
           {TOOLBAR.map(({ icon: Icon, cmd, title }) => (
             <button
               key={cmd}
               onMouseDown={e => { e.preventDefault(); exec(cmd); }}
               title={title}
-              className="p-1.5 rounded hover:bg-slate-100 text-slate-600 transition"
+              className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition"
             >
               <Icon size={16} />
             </button>
           ))}
-          <div className="w-px h-5 bg-slate-200 mx-1" />
+          <div className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1" />
           {(['h1', 'h2', 'h3'] as const).map(tag => (
             <button
               key={tag}
               onMouseDown={e => { e.preventDefault(); exec('formatBlock', tag); }}
-              className="p-1.5 rounded hover:bg-slate-100 text-slate-600 transition text-xs font-bold uppercase"
+              className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition text-xs font-bold uppercase"
             >
               {tag}
             </button>
           ))}
-          <button onMouseDown={e => { e.preventDefault(); exec('formatBlock', 'p'); }} title="Normal" className="p-1.5 rounded hover:bg-slate-100 text-slate-600 transition">
+          <button onMouseDown={e => { e.preventDefault(); exec('formatBlock', 'p'); }} title="Normal" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
             <Type size={16} />
           </button>
-          <div className="w-px h-5 bg-slate-200 mx-1" />
-          <button onMouseDown={e => { e.preventDefault(); exec('insertUnorderedList'); }} title="Aufzählung" className="p-1.5 rounded hover:bg-slate-100 text-slate-600 transition">
+          <div className="w-px h-5 bg-slate-200 dark:bg-slate-700 mx-1" />
+          <button onMouseDown={e => { e.preventDefault(); exec('insertUnorderedList'); }} title="Aufzählung" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
             <List size={16} />
           </button>
-          <button onMouseDown={e => { e.preventDefault(); exec('insertOrderedList'); }} title="Nummerierung" className="p-1.5 rounded hover:bg-slate-100 text-slate-600 transition">
+          <button onMouseDown={e => { e.preventDefault(); exec('insertOrderedList'); }} title="Nummerierung" className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
             <ListOrdered size={16} />
           </button>
         </div>
@@ -454,15 +454,15 @@ export default function NotesPage() {
           contentEditable
           suppressContentEditableWarning
           onInput={handleEditorInput}
-          className="flex-1 px-6 py-4 overflow-y-auto outline-none text-slate-800 text-sm leading-relaxed
-            [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-slate-900 [&_h1]:mb-3 [&_h1]:mt-4
-            [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-slate-800 [&_h2]:mb-2 [&_h2]:mt-3
-            [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-slate-700 [&_h3]:mb-2 [&_h3]:mt-3
+          className="flex-1 px-6 py-4 overflow-y-auto outline-none text-slate-800 dark:text-slate-200 text-sm leading-relaxed
+            [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-slate-900 dark:[&_h1]:text-slate-100 [&_h1]:mb-3 [&_h1]:mt-4
+            [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-slate-800 dark:[&_h2]:text-slate-200 [&_h2]:mb-2 [&_h2]:mt-3
+            [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-slate-700 dark:[&_h3]:text-slate-300 [&_h3]:mb-2 [&_h3]:mt-3
             [&_ul]:list-disc [&_ul]:ml-5 [&_ul]:mb-2 [&_ul]:space-y-1
             [&_ol]:list-decimal [&_ol]:ml-5 [&_ol]:mb-2 [&_ol]:space-y-1
             [&_p]:mb-2 [&_p]:min-h-[1.5em]
-            [&_table]:border-collapse [&_table]:w-full [&_td]:border [&_td]:border-slate-300 [&_td]:p-2
-            [&_th]:border [&_th]:border-slate-300 [&_th]:p-2 [&_th]:bg-slate-50"
+            [&_table]:border-collapse [&_table]:w-full [&_td]:border [&_td]:border-slate-300 dark:[&_td]:border-slate-600 [&_td]:p-2
+            [&_th]:border [&_th]:border-slate-300 dark:[&_th]:border-slate-600 [&_th]:p-2 [&_th]:bg-slate-50 dark:[&_th]:bg-slate-700"
           spellCheck
         />
       </div>

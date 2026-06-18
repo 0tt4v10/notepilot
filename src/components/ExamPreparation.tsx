@@ -46,12 +46,12 @@ export default function ExamPreparation() {
   const completedCount = topics.filter(t => t.completed).length;
 
   return (
-    <div className="flex-1 overflow-auto p-8">
+    <div className="flex-1 overflow-auto p-8 bg-slate-50 dark:bg-slate-900">
       <div className="max-w-4xl">
         {/* Header */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-slate-900">Prüfungsvorbereitung</h2>
-          <p className="text-slate-500 mt-2">Verwalten Sie Ihre Lernthemen und Prüfungsvorbereitungen</p>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Prüfungsvorbereitung</h2>
+          <p className="text-slate-500 dark:text-slate-400 mt-2">Verwalten Sie Ihre Lernthemen und Prüfungsvorbereitungen</p>
         </div>
 
         {/* Progress Overview */}
@@ -67,7 +67,7 @@ export default function ExamPreparation() {
         </div>
 
         {/* Add Topic Form */}
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-6 mb-6">
           <div className="flex gap-2">
             <input
               type="text"
@@ -75,7 +75,7 @@ export default function ExamPreparation() {
               onChange={(e) => setNewTopic(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && addTopic()}
               placeholder="Neues Lernthema hinzufügen..."
-              className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
             />
             <button
               onClick={addTopic}
@@ -92,7 +92,7 @@ export default function ExamPreparation() {
           {topics.map((topic) => (
             <div
               key={topic.id}
-              className={`bg-white rounded-lg shadow p-4 hover:shadow-md transition ${
+              className={`bg-white dark:bg-slate-800 rounded-lg shadow p-4 hover:shadow-md transition ${
                 topic.completed ? 'border-l-4 border-green-500' : 'border-l-4 border-blue-500'
               }`}
             >
@@ -102,24 +102,24 @@ export default function ExamPreparation() {
                   className={`flex-shrink-0 w-6 h-6 rounded-full border-2 transition flex items-center justify-center ${
                     topic.completed
                       ? 'bg-green-500 border-green-500'
-                      : 'border-slate-300 hover:border-green-500'
+                      : 'border-slate-300 dark:border-slate-500 hover:border-green-500'
                   }`}
                 >
                   {topic.completed && <CheckCircle size={20} className="text-white" />}
                 </button>
 
                 <div className="flex-1">
-                  <h3 className={`font-semibold ${topic.completed ? 'line-through text-slate-400' : 'text-slate-900'}`}>
+                  <h3 className={`font-semibold ${topic.completed ? 'line-through text-slate-400' : 'text-slate-900 dark:text-slate-100'}`}>
                     {topic.name}
                   </h3>
                   <div className="flex items-center gap-4 mt-2">
                     {/* Progress Bar */}
                     <div className="flex-1">
-                      <div className="flex justify-between text-xs text-slate-500 mb-1">
+                      <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-1">
                         <span>Fortschritt</span>
                         <span>{topic.progress}%</span>
                       </div>
-                      <div className="w-full bg-slate-200 rounded-full h-2">
+                      <div className="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-2">
                         <div
                           className={`h-2 rounded-full transition-all ${
                             topic.completed ? 'bg-green-500' : 'bg-blue-500'
@@ -130,7 +130,7 @@ export default function ExamPreparation() {
                     </div>
 
                     {/* Due Date */}
-                    <div className="flex items-center gap-1 text-sm text-slate-500">
+                    <div className="flex items-center gap-1 text-sm text-slate-500 dark:text-slate-400">
                       <Clock size={16} />
                       {new Date(topic.dueDate).toLocaleDateString('de-DE')}
                     </div>
@@ -139,7 +139,7 @@ export default function ExamPreparation() {
 
                 <button
                   onClick={() => deleteTopic(topic.id)}
-                  className="flex-shrink-0 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition"
+                  className="flex-shrink-0 p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
                 >
                   <Trash2 size={20} />
                 </button>

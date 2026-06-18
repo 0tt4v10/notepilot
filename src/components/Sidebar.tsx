@@ -16,11 +16,11 @@ export default function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
   ];
 
   return (
-    <aside className="w-64 bg-white border-r border-slate-200 flex flex-col shadow-sm">
+    <aside className="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col shadow-sm">
       {/* Header */}
-      <div className="p-6 border-b border-slate-200">
+      <div className="p-6 border-b border-slate-200 dark:border-slate-700">
         <h1 className="text-2xl font-bold text-blue-600">NotePilot</h1>
-        <p className="text-sm text-slate-500 mt-1">Learning Assistant</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Learning Assistant</p>
       </div>
 
       {/* Navigation */}
@@ -34,8 +34,8 @@ export default function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
               onClick={() => setCurrentPage(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                 isActive
-                  ? 'bg-blue-100 text-blue-700 font-medium'
-                  : 'text-slate-600 hover:bg-slate-100'
+                  ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
               }`}
             >
               <Icon size={20} />
@@ -46,8 +46,8 @@ export default function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-slate-200">
-        <div className="text-xs text-slate-500 text-center">
+      <div className="p-4 border-t border-slate-200 dark:border-slate-700">
+        <div className="text-xs text-slate-500 dark:text-slate-400 text-center">
           <p>NotePilot v1.0</p>
           <a
             href="https://github.com"

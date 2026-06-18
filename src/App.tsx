@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import ExamPreparation from './components/ExamPreparation';
@@ -12,6 +12,11 @@ type Page = 'notes' | 'dashboard' | 'exam' | 'settings' | 'chat';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('notes');
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
+
+  useEffect(() => {
+    localStorage.setItem('darkMode', String(darkMode));
+  }, [darkMode]);
 
   const renderContent = () => {
     switch (currentPage) {
@@ -22,7 +27,7 @@ function App() {
       case 'exam':
         return <ExamPreparation />;
       case 'settings':
-        return <Settings />;
+        return <Settings darkMode={darkMode} onToggleDarkMode={() => setDarkMode(d => !d)} />;
       case 'chat':
         return <ChatAssistant />;
       default:
@@ -31,7 +36,7 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className={`flex h-screen bg-slate-50 dark:bg-slate-900 ${darkMode ? 'dark' : ''}`}>
       <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
       <main className="flex-1 flex flex-col overflow-hidden">
         {renderContent()}
