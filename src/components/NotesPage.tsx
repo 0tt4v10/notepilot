@@ -238,41 +238,33 @@ export default function NotesPage() {
   };
   const onPageDragOver = (e: React.DragEvent, pgId: string) => {
     e.preventDefault();
-    if (dragItem.current?.type === 'page') setDragOverPageId(pgId);
+    if (dragItem.current?.type === 'page') { setDragOverPageId(pgId); setDragOverSecId(null); }
   };
   const onPageDrop = (e: React.DragEvent, targetPageId: string) => {
     e.preventDefault();
     setDragOverPageId(null);
     const item = dragItem.current;
-    if (!item || item.type !== 'page') return;
+    if (!item || item.type !== 'page' || item.pageId === targetPageId) { dragItem.current = null; return; }
+    // Same section reorder only
+    if (item.fromSecId !== selSec.id || item.fromNbId !== selNb.id) { dragItem.current = null; return; }
     dragItem.current = null;
 
-    setNotebooks(prev => {
-      // Remove page from source
-      let movedPage: Page | undefined;
-      const next = prev.map(nb => ({
-        ...nb,
-        sections: nb.sections.map(sec => {
-          if (sec.id !== item.fromSecId || nb.id !== item.fromNbId) return sec;
-          movedPage = sec.pages.find(p => p.id === item.pageId);
-          return { ...sec, pages: sec.pages.filter(p => p.id !== item.pageId) };
-        }),
-      }));
-      if (!movedPage) return prev;
+    const pages = [...selSec.pages];
+    const fromIdx = pages.findIndex(p => p.id === item.pageId);
+    const toIdx = pages.findIndex(p => p.id === targetPageId);
+    if (fromIdx === -1 || toIdx === -1) return;
+    const [moved] = pages.splice(fromIdx, 1);
+    pages.splice(toIdx, 0, moved);
 
-      // Insert before target page in current section
-      return next.map(nb => ({
+    setNotebooks(prev => prev.map(nb =>
+      nb.id !== selNb.id ? nb : {
         ...nb,
-        sections: nb.sections.map(sec => {
-          if (sec.id !== selSec.id || nb.id !== selNb.id) return sec;
-          const pages = [...sec.pages];
-          const idx = pages.findIndex(p => p.id === targetPageId);
-          if (idx === -1) return { ...sec, pages: [...pages, movedPage!] };
-          pages.splice(idx, 0, movedPage!);
-          return { ...sec, pages };
-        }),
-      }));
-    });
+        sections: nb.sections.map(sec =>
+          sec.id !== selSec.id ? sec : { ...sec, pages }
+        ),
+      }
+    ));
+    setSelSec(s => ({ ...s, pages }));
   };
 
   // Drop page onto a section header → move page to that section
@@ -280,37 +272,36 @@ export default function NotesPage() {
     e.preventDefault();
     setDragOverSecId(null);
     const item = dragItem.current;
-    if (!item || item.type !== 'page') return;
-    if (item.fromSecId === targetSecId) return;
+    if (!item || item.type !== 'page' || item.fromSecId === targetSecId) { dragItem.current = null; return; }
+    // Prevent emptying source section
+    const srcSec = notebooks.find(n => n.id === item.fromNbId)?.sections.find(s => s.id === item.fromSecId);
+    if (!srcSec || srcSec.pages.length <= 1) { dragItem.current = null; return; }
+    const movedPage = srcSec.pages.find(p => p.id === item.pageId);
+    if (!movedPage) { dragItem.current = null; return; }
     dragItem.current = null;
 
-    setNotebooks(prev => {
-      let movedPage: Page | undefined;
-      const next = prev.map(nb => ({
-        ...nb,
-        sections: nb.sections.map(sec => {
-          if (sec.id !== item.fromSecId || nb.id !== item.fromNbId) return sec;
-          movedPage = sec.pages.find(p => p.id === item.pageId);
-          const pages = sec.pages.filter(p => p.id !== item.pageId);
-          return { ...sec, pages: pages.length ? pages : sec.pages }; // don't leave empty
-        }),
-      }));
-      if (!movedPage) return prev;
-      return next.map(nb => ({
-        ...nb,
-        sections: nb.sections.map(sec =>
-          sec.id !== targetSecId || nb.id !== targetNbId ? sec : { ...sec, pages: [...sec.pages, movedPage!] }
-        ),
-      }));
-    });
+    const updated = notebooks.map(nb => ({
+      ...nb,
+      sections: nb.sections.map(sec => {
+        if (nb.id === item.fromNbId && sec.id === item.fromSecId)
+          return { ...sec, pages: sec.pages.filter(p => p.id !== item.pageId) };
+        if (nb.id === targetNbId && sec.id === targetSecId)
+          return { ...sec, pages: [...sec.pages, movedPage] };
+        return sec;
+      }),
+    }));
+    setNotebooks(updated);
 
-    // Navigate to target section
-    setNotebooks(prev => {
-      const nb = prev.find(n => n.id === targetNbId);
-      const sec = nb?.sections.find(s => s.id === targetSecId);
-      if (nb && sec) { setSelNb(nb); setSelSec(sec); }
-      return prev;
-    });
+    // Navigate to target section so the page is visible
+    const targetNb = updated.find(n => n.id === targetNbId);
+    const targetSec = targetNb?.sections.find(s => s.id === targetSecId);
+    if (targetNb && targetSec) {
+      setSelNb(targetNb);
+      setSelSec(targetSec);
+      const pg = targetSec.pages[targetSec.pages.length - 1];
+      setSelPage(pg); setPageTitle(pg.title);
+      if (editorRef.current) editorRef.current.innerHTML = pg.content;
+    }
   };
 
   // ── Drag & Drop: Sections ──
@@ -321,32 +312,28 @@ export default function NotesPage() {
   };
   const onSecDragOver = (e: React.DragEvent, secId: string) => {
     e.preventDefault();
-    if (dragItem.current?.type === 'section') setDragOverSecId(secId);
+    if (dragItem.current?.type === 'section') { setDragOverSecId(secId); setDragOverPageId(null); }
   };
   const onSecDrop = (e: React.DragEvent, targetSecId: string, targetNbId: string) => {
     e.preventDefault();
     setDragOverSecId(null);
     const item = dragItem.current;
-    if (!item || item.type !== 'section' || item.secId === targetSecId) return;
+    if (!item || item.type !== 'section' || item.secId === targetSecId || item.fromNbId !== targetNbId) {
+      dragItem.current = null; return;
+    }
     dragItem.current = null;
 
-    setNotebooks(prev => {
-      let movedSec: Section | undefined;
-      const next = prev.map(nb => {
-        if (nb.id !== item.fromNbId) return nb;
-        movedSec = nb.sections.find(s => s.id === item.secId);
-        return { ...nb, sections: nb.sections.filter(s => s.id !== item.secId) };
-      });
-      if (!movedSec) return prev;
-      return next.map(nb => {
-        if (nb.id !== targetNbId) return nb;
-        const secs = [...nb.sections];
-        const idx = secs.findIndex(s => s.id === targetSecId);
-        if (idx === -1) return { ...nb, sections: [...secs, movedSec!] };
-        secs.splice(idx, 0, movedSec!);
-        return { ...nb, sections: secs };
-      });
-    });
+    const srcNb = notebooks.find(n => n.id === item.fromNbId);
+    if (!srcNb) return;
+    const secs = [...srcNb.sections];
+    const fromIdx = secs.findIndex(s => s.id === item.secId);
+    const toIdx = secs.findIndex(s => s.id === targetSecId);
+    if (fromIdx === -1 || toIdx === -1) return;
+    const [moved] = secs.splice(fromIdx, 1);
+    secs.splice(toIdx, 0, moved);
+
+    setNotebooks(prev => prev.map(nb => nb.id !== targetNbId ? nb : { ...nb, sections: secs }));
+    if (item.fromNbId === selNb.id) setSelNb(n => ({ ...n, sections: secs }));
   };
 
   const createNoteFromImport = (title: string, content: string, fileName: string) => {
