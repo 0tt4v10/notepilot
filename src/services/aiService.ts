@@ -1,39 +1,17 @@
-const API_KEY_STORAGE = 'notepilot-api-key';
-
-export function getApiKey(): string {
-  return localStorage.getItem(API_KEY_STORAGE) ?? '';
-}
-
-export function saveApiKey(key: string): void {
-  localStorage.setItem(API_KEY_STORAGE, key);
-}
-
 async function callClaude(
   messages: { role: 'user' | 'assistant'; content: string }[],
   system: string
 ): Promise<string> {
-  const apiKey = getApiKey();
-  if (!apiKey) throw new Error('Kein API-Schlüssel gesetzt. Bitte in den Einstellungen eintragen.');
-
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch('/api/ai', {
     method: 'POST',
-    headers: {
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-allow-browser': 'true',
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1024,
-      system,
-      messages,
-    }),
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ messages, system }),
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({})) as { error?: { message?: string } };
-    throw new Error(err?.error?.message ?? `API-Fehler ${res.status}`);
+    const err = await res.json().catch(() => ({})) as { error?: string | { message?: string } };
+    const msg = typeof err.error === 'string' ? err.error : err.error?.message;
+    throw new Error(msg ?? `Fehler ${res.status}`);
   }
 
   const data = await res.json() as { content: { text: string }[] };

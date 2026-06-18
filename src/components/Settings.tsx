@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, Bell, Moon, Volume2, Save, Key, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import { Settings as SettingsIcon, Bell, Moon, Volume2, Save } from 'lucide-react';
 import { useLanguage } from '../LanguageContext';
 import { Language } from '../i18n';
-import { getApiKey, saveApiKey } from '../services/aiService';
 
 interface SettingsState {
   notifications: boolean;
@@ -32,15 +31,6 @@ export default function SettingsPage({ darkMode, onToggleDarkMode, language, onL
     emailAlerts: true,
   });
   const [saved, setSaved] = useState(false);
-  const [apiKey, setApiKey] = useState(getApiKey);
-  const [showKey, setShowKey] = useState(false);
-  const [keySaved, setKeySaved] = useState(false);
-
-  const handleSaveApiKey = () => {
-    saveApiKey(apiKey.trim());
-    setKeySaved(true);
-    setTimeout(() => setKeySaved(false), 2000);
-  };
 
   const handleToggle = (key: keyof SettingsState) => {
     setSettings(prev => ({ ...prev, [key]: !prev[key] }));
@@ -61,44 +51,6 @@ export default function SettingsPage({ darkMode, onToggleDarkMode, language, onL
         </div>
 
         <div className="space-y-6">
-          {/* Claude API Key */}
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-6 border-2 border-blue-100 dark:border-blue-900">
-            <div className="flex items-center gap-3 mb-4">
-              <Key className="text-blue-500" size={24} />
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Claude API-Schlüssel</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Benötigt für den KI-Assistenten</p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <input
-                  type={showKey ? 'text' : 'password'}
-                  value={apiKey}
-                  onChange={e => setApiKey(e.target.value)}
-                  placeholder="sk-ant-api03-..."
-                  className="w-full px-4 py-2 pr-10 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
-                />
-                <button
-                  onClick={() => setShowKey(v => !v)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                >
-                  {showKey ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-              <button
-                onClick={handleSaveApiKey}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-medium text-sm"
-              >
-                {keySaved ? <CheckCircle size={16} /> : <Save size={16} />}
-                {keySaved ? '✓' : t.set_save}
-              </button>
-            </div>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">
-              Schlüssel wird nur lokal im Browser gespeichert. Erhältlich auf console.anthropic.com
-            </p>
-          </div>
-
           {/* Notifications */}
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
             <div className="flex items-center gap-3 mb-4">
