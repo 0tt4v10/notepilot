@@ -20,3 +20,81 @@ body {
 #root {
   min-height: 100vh;
 }
+
+/* Font sizes */
+[data-fontsize="sm"] { font-size: 13px; }
+[data-fontsize="md"] { font-size: 16px; }
+[data-fontsize="lg"] { font-size: 19px; }
+
+/* ── Accent color themes ── */
+/* purple */
+[data-accent="purple"] .bg-blue-500 { background-color: #8b5cf6 !important; }
+[data-accent="purple"] .bg-blue-600 { background-color: #7c3aed !important; }
+[data-accent="purple"] .from-blue-500 { --tw-gradient-from: #8b5cf6 !important; }
+[data-accent="purple"] .to-blue-600   { --tw-gradient-to:   #7c3aed !important; }
+[data-accent="purple"] .text-blue-500 { color: #8b5cf6 !important; }
+[data-accent="purple"] .text-blue-600 { color: #7c3aed !important; }
+[data-accent="purple"] .text-blue-300 { color: #c4b5fd !important; }
+[data-accent="purple"] .text-blue-100 { color: #ede9fe !important; }
+[data-accent="purple"] .border-blue-500 { border-color: #8b5cf6 !important; }
+[data-accent="purple"] .bg-blue-50  { background-color: #f5f3ff !important; }
+[data-accent="purple"] .bg-blue-100 { background-color: #ede9fe !important; }
+[data-accent="purple"] .bg-blue-900 { background-color: #4c1d95 !important; }
+[data-accent="purple"] .ring-blue-500 { --tw-ring-color: #8b5cf6 !important; }
+[data-accent="purple"] .focus\:ring-blue-500:focus { --tw-ring-color: #8b5cf6 !important; }
+[data-accent="purple"] .hover\:bg-blue-600:hover { background-color: #7c3aed !important; }
+[data-accent="purple"] .hover\:border-blue-300:hover { border-color: #c4b5fd !important; }
+
+/* green */
+[data-accent="green"] .bg-blue-500 { background-color: #22c55e !important; }
+[data-accent="green"] .bg-blue-600 { background-color: #16a34a !important; }
+[data-accent="green"] .from-blue-500 { --tw-gradient-from: #22c55e !important; }
+[data-accent="green"] .to-blue-600   { --tw-gradient-to:   #16a34a !important; }
+[data-accent="green"] .text-blue-500 { color: #22c55e !important; }
+[data-accent="green"] .text-blue-600 { color: #16a34a !important; }
+[data-accent="green"] .text-blue-300 { color: #86efac !important; }
+[data-accent="green"] .text-blue-100 { color: #dcfce7 !important; }
+[data-accent="green"] .border-blue-500 { border-color: #22c55e !important; }
+[data-accent="green"] .bg-blue-50  { background-color: #f0fdf4 !important; }
+[data-accent="green"] .bg-blue-100 { background-color: #dcfce7 !important; }
+[data-accent="green"] .bg-blue-900 { background-color: #14532d !important; }
+[data-accent="green"] .ring-blue-500 { --tw-ring-color: #22c55e !important; }
+[data-accent="green"] .focus\:ring-blue-500:focus { --tw-ring-color: #22c55e !important; }
+[data-accent="green"] .hover\:bg-blue-600:hover { background-color: #16a34a !important; }
+[data-accent="green"] .hover\:border-blue-300:hover { border-color: #86efac !important; }
+
+/* orange */
+[data-accent="orange"] .bg-blue-500 { background-color: #f97316 !important; }
+[data-accent="orange"] .bg-blue-600 { background-color: #ea580c !important; }
+[data-accent="orange"] .from-blue-500 { --tw-gradient-from: #f97316 !important; }
+[data-accent="orange"] .to-blue-600   { --tw-gradient-to:   #ea580c !important; }
+[data-accent="orange"] .text-blue-500 { color: #f97316 !important; }
+[data-accent="orange"] .text-blue-600 { color: #ea580c !important; }
+[data-accent="orange"] .text-blue-300 { color: #fdba74 !important; }
+[data-accent="orange"] .text-blue-100 { color: #ffedd5 !important; }
+[data-accent="orange"] .border-blue-500 { border-color: #f97316 !important; }
+[data-accent="orange"] .bg-blue-50  { background-color: #fff7ed !important; }
+[data-accent="orange"] .bg-blue-100 { background-color: #ffedd5 !important; }
+[data-accent="orange"] .bg-blue-900 { background-color: #7c2d12 !important; }
+[data-accent="orange"] .ring-blue-500 { --tw-ring-color: #f97316 !important; }
+[data-accent="orange"] .focus\:ring-blue-500:focus { --tw-ring-color: #f97316 !important; }
+[data-accent="orange"] .hover\:bg-blue-600:hover { background-color: #ea580c !important; }
+[data-accent="orange"] .hover\:border-blue-300:hover { border-color: #fdba74 !important; }
+
+/* rose */
+[data-accent="rose"] .bg-blue-500 { background-color: #f43f5e !important; }
+[data-accent="rose"] .bg-blue-600 { background-color: #e11d48 !important; }
+[data-accent="rose"] .from-blue-500 { --tw-gradient-from: #f43f5e !important; }
+[data-accent="rose"] .to-blue-600   { --tw-gradient-to:   #e11d48 !important; }
+[data-accent="rose"] .text-blue-500 { color: #f43f5e !important; }
+[data-accent="rose"] .text-blue-600 { color: #e11d48 !important; }
+[data-accent="rose"] .text-blue-300 { color: #fda4af !important; }
+[data-accent="rose"] .text-blue-100 { color: #ffe4e6 !important; }
+[data-accent="rose"] .border-blue-500 { border-color: #f43f5e !important; }
+[data-accent="rose"] .bg-blue-50  { background-color: #fff1f2 !important; }
+[data-accent="rose"] .bg-blue-100 { background-color: #ffe4e6 !important; }
+[data-accent="rose"] .bg-blue-900 { background-color: #881337 !important; }
+[data-accent="rose"] .ring-blue-500 { --tw-ring-color: #f43f5e !important; }
+[data-accent="rose"] .focus\:ring-blue-500:focus { --tw-ring-color: #f43f5e !important; }
+[data-accent="rose"] .hover\:bg-blue-600:hover { background-color: #e11d48 !important; }
+[data-accent="rose"] .hover\:border-blue-300:hover { border-color: #fda4af !important; }

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Settings as SettingsIcon, Bell, Moon, Volume2, Save } from 'lucide-react';
+import { Settings as SettingsIcon, Bell, Moon, Volume2, Save, Palette, Type } from 'lucide-react';
 import { useLanguage } from '../LanguageContext';
 import { Language } from '../i18n';
+import type { AccentColor, FontSize } from '../App';
 
 interface SettingsState {
   notifications: boolean;
@@ -14,6 +15,10 @@ interface Props {
   onToggleDarkMode: () => void;
   language: Language;
   onLanguageChange: (lang: Language) => void;
+  accentColor: AccentColor;
+  onAccentColorChange: (c: AccentColor) => void;
+  fontSize: FontSize;
+  onFontSizeChange: (s: FontSize) => void;
 }
 
 const LANGUAGES: { value: Language; label: string }[] = [
@@ -23,7 +28,21 @@ const LANGUAGES: { value: Language; label: string }[] = [
   { value: 'en', label: 'English' },
 ];
 
-export default function SettingsPage({ darkMode, onToggleDarkMode, language, onLanguageChange }: Props) {
+const ACCENT_COLORS: { value: AccentColor; hex: string; label: string }[] = [
+  { value: 'blue',   hex: '#3b82f6', label: 'Blau' },
+  { value: 'purple', hex: '#8b5cf6', label: 'Lila' },
+  { value: 'green',  hex: '#22c55e', label: 'Grün' },
+  { value: 'orange', hex: '#f97316', label: 'Orange' },
+  { value: 'rose',   hex: '#f43f5e', label: 'Rosa' },
+];
+
+const FONT_SIZES: { value: FontSize; label: string }[] = [
+  { value: 'sm', label: 'Klein' },
+  { value: 'md', label: 'Normal' },
+  { value: 'lg', label: 'Gross' },
+];
+
+export default function SettingsPage({ darkMode, onToggleDarkMode, language, onLanguageChange, accentColor, onAccentColorChange, fontSize, onFontSizeChange }: Props) {
   const { t } = useLanguage();
   const [settings, setSettings] = useState<SettingsState>({
     notifications: true,
@@ -87,6 +106,60 @@ export default function SettingsPage({ darkMode, onToggleDarkMode, language, onL
                 <p className="text-sm text-slate-500 dark:text-slate-400">{t.set_darkmode_desc}</p>
               </div>
               <Toggle checked={darkMode} onChange={onToggleDarkMode} color="purple" />
+            </div>
+          </div>
+
+          {/* Accent Color */}
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Palette className="text-pink-500" size={24} />
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Akzentfarbe</h3>
+            </div>
+            <div className="p-3 bg-slate-50 dark:bg-slate-700 rounded">
+              <p className="text-sm font-medium text-slate-900 dark:text-slate-100 mb-3">Farbe wählen</p>
+              <div className="flex gap-3 flex-wrap">
+                {ACCENT_COLORS.map(c => (
+                  <button
+                    key={c.value}
+                    onClick={() => onAccentColorChange(c.value)}
+                    title={c.label}
+                    className={`w-10 h-10 rounded-full border-4 transition-transform hover:scale-110 ${
+                      accentColor === c.value
+                        ? 'border-slate-900 dark:border-white scale-110'
+                        : 'border-transparent'
+                    }`}
+                    style={{ backgroundColor: c.hex }}
+                  />
+                ))}
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                Gewählt: {ACCENT_COLORS.find(c => c.value === accentColor)?.label}
+              </p>
+            </div>
+          </div>
+
+          {/* Font Size */}
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Type className="text-teal-500" size={24} />
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Schriftgrösse</h3>
+            </div>
+            <div className="p-3 bg-slate-50 dark:bg-slate-700 rounded">
+              <div className="flex gap-2">
+                {FONT_SIZES.map(s => (
+                  <button
+                    key={s.value}
+                    onClick={() => onFontSizeChange(s.value)}
+                    className={`flex-1 py-2 rounded-lg border-2 font-medium transition text-sm ${
+                      fontSize === s.value
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300'
+                        : 'border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:border-blue-300'
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
