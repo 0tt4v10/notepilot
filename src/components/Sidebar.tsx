@@ -1,5 +1,5 @@
-import React from 'react';
 import { TrendingUp, BookOpen, Settings as SettingsIcon, MessageCircle, PenLine } from 'lucide-react';
+import { useLanguage } from '../LanguageContext';
 
 interface SidebarProps {
   currentPage: string;
@@ -7,23 +7,23 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
+  const { t } = useLanguage();
+
   const menuItems = [
-    { id: 'notes', label: 'Notizen', icon: PenLine },
-    { id: 'dashboard', label: 'Lernfortschritt', icon: TrendingUp },
-    { id: 'exam', label: 'Prüfungsvorbereitung', icon: BookOpen },
-    { id: 'chat', label: 'KI Assistent', icon: MessageCircle },
-    { id: 'settings', label: 'Einstellungen', icon: SettingsIcon },
+    { id: 'notes', label: t.nav_notes, icon: PenLine },
+    { id: 'dashboard', label: t.nav_dashboard, icon: TrendingUp },
+    { id: 'exam', label: t.nav_exam, icon: BookOpen },
+    { id: 'chat', label: t.nav_chat, icon: MessageCircle },
+    { id: 'settings', label: t.nav_settings, icon: SettingsIcon },
   ];
 
   return (
     <aside className="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col shadow-sm">
-      {/* Header */}
       <div className="p-6 border-b border-slate-200 dark:border-slate-700">
         <h1 className="text-2xl font-bold text-blue-600">NotePilot</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Learning Assistant</p>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2">
         {menuItems.map((item) => {
           const Icon = item.icon;
@@ -45,7 +45,6 @@ export default function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
         })}
       </nav>
 
-      {/* Footer */}
       <div className="p-4 border-t border-slate-200 dark:border-slate-700">
         <div className="text-xs text-slate-500 dark:text-slate-400 text-center">
           <p>NotePilot v1.0</p>

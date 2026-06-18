@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, MessageCircle, Loader } from 'lucide-react';
 import { chat } from '../services/aiService';
+import { useLanguage } from '../LanguageContext';
 
 interface Message {
   id: string;
@@ -11,14 +12,7 @@ interface Message {
 
 const STORAGE_KEY = 'notepilot-chat-messages';
 
-const DEFAULT_MESSAGE: Message = {
-  id: '1',
-  text: 'Hallo! Ich bin Ihr NotePilot KI-Assistent. Wie kann ich dir heute beim Lernen helfen?',
-  sender: 'assistant',
-  timestamp: new Date(),
-};
-
-function loadMessages(): Message[] {
+function loadMessages(welcomeText: string): Message[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
@@ -30,33 +24,27 @@ function loadMessages(): Message[] {
   } catch {
     // ignore corrupted storage
   }
-  return [DEFAULT_MESSAGE];
+  return [{ id: '1', text: welcomeText, sender: 'assistant', timestamp: new Date() }];
 }
 
 export default function ChatAssistant() {
-  const [messages, setMessages] = useState<Message[]>(loadMessages);
-
+  const { t } = useLanguage();
+  const [messages, setMessages] = useState<Message[]>(() => loadMessages(t.chat_welcome));
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Persist chat history so it survives switching pages and reloads
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
   }, [messages]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!inputValue.trim() || isLoading) return;
 
     const userMessage: Message = {
@@ -89,50 +77,34 @@ export default function ChatAssistant() {
 
   return (
     <div className="flex-1 flex flex-col bg-white dark:bg-slate-900">
-      {/* Chat Header */}
       <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 shadow">
         <div className="flex items-center gap-3">
           <MessageCircle size={28} />
           <div>
-            <h2 className="text-2xl font-bold">KI Assistent</h2>
-            <p className="text-blue-100 text-sm">Ihr persönlicher Lernbegleiter</p>
+            <h2 className="text-2xl font-bold">{t.chat_title}</h2>
+            <p className="text-blue-100 text-sm">{t.chat_subtitle}</p>
           </div>
         </div>
       </div>
 
-      {/* Messages Area */}
       <div className="flex-1 overflow-auto p-6 space-y-4">
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex gap-3 ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
+        {messages.map(message => (
+          <div key={message.id} className={`flex gap-3 ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
             {message.sender === 'assistant' && (
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
                 <MessageCircle size={18} className="text-blue-600 dark:text-blue-300" />
               </div>
             )}
-
-            <div
-              className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
-                message.sender === 'user'
-                  ? 'bg-blue-500 text-white rounded-br-none'
-                  : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-bl-none'
-              }`}
-            >
+            <div className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
+              message.sender === 'user'
+                ? 'bg-blue-500 text-white rounded-br-none'
+                : 'bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-bl-none'
+            }`}>
               <p className="text-sm leading-relaxed">{message.text}</p>
-              <p
-                className={`text-xs mt-1 ${
-                  message.sender === 'user' ? 'text-blue-100' : 'text-slate-500 dark:text-slate-400'
-                }`}
-              >
-                {message.timestamp.toLocaleTimeString('de-DE', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
+              <p className={`text-xs mt-1 ${message.sender === 'user' ? 'text-blue-100' : 'text-slate-500 dark:text-slate-400'}`}>
+                {message.timestamp.toLocaleTimeString('de-CH', { hour: '2-digit', minute: '2-digit' })}
               </p>
             </div>
-
             {message.sender === 'user' && (
               <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-300 dark:bg-slate-600 flex items-center justify-center">
                 <span className="text-sm font-semibold text-white">Du</span>
@@ -147,26 +119,22 @@ export default function ChatAssistant() {
               <Loader size={18} className="text-blue-600 dark:text-blue-300 animate-spin" />
             </div>
             <div className="bg-slate-100 dark:bg-slate-700 text-slate-900 dark:text-slate-100 px-4 py-3 rounded-lg rounded-bl-none">
-              <p className="text-sm">Der Assistent schreibt...</p>
+              <p className="text-sm">{t.chat_typing}</p>
             </div>
           </div>
         )}
 
-        {error && (
-          <div className="text-sm text-red-500 bg-red-50 rounded-lg px-4 py-3">{error}</div>
-        )}
-
+        {error && <div className="text-sm text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg px-4 py-3">{error}</div>}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
       <div className="border-t border-slate-200 dark:border-slate-700 p-6 bg-slate-50 dark:bg-slate-800">
         <form onSubmit={handleSendMessage} className="flex gap-3">
           <input
             type="text"
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Stellen Sie eine Frage oder bitten Sie um Hilfe..."
+            onChange={e => setInputValue(e.target.value)}
+            placeholder={t.chat_placeholder}
             disabled={isLoading}
             className="flex-1 px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 dark:disabled:bg-slate-700 disabled:cursor-not-allowed bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
           />
@@ -179,21 +147,13 @@ export default function ChatAssistant() {
           </button>
         </form>
 
-        {/* Suggestions */}
         <div className="mt-4">
-          <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Beispielfragen:</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">{t.chat_example_questions}</p>
           <div className="grid grid-cols-2 gap-2">
-            {[
-              'Erstelle eine Zusammenfassung',
-              'Quiz zu diesem Thema',
-              'Tipps zum Lernen',
-              'Mein Lernplan',
-            ].map((suggestion, idx) => (
+            {t.chat_suggestions.map((suggestion, idx) => (
               <button
                 key={idx}
-                onClick={() => {
-                  setInputValue(suggestion);
-                }}
+                onClick={() => setInputValue(suggestion)}
                 className="text-xs px-3 py-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded hover:bg-slate-100 dark:hover:bg-slate-600 transition text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100"
               >
                 {suggestion}

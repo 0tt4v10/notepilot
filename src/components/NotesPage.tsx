@@ -5,6 +5,7 @@ import {
   Upload,
 } from 'lucide-react';
 import mammoth from 'mammoth';
+import { useLanguage } from '../LanguageContext';
 
 interface Page {
   id: string;
@@ -107,6 +108,7 @@ function parseOneNoteHtml(html: string): { title: string; content: string } {
 }
 
 export default function NotesPage() {
+  const { t } = useLanguage();
   const [notebooks, setNotebooks] = useState<Notebook[]>(loadNotebooks);
   const [selNb, setSelNb] = useState<Notebook>(notebooks[0]);
   const [selSec, setSelSec] = useState<Section>(notebooks[0].sections[0]);
@@ -310,7 +312,7 @@ export default function NotesPage() {
       {/* Notebooks panel */}
       <div className="w-52 border-r border-slate-200 dark:border-slate-700 flex flex-col bg-slate-50 dark:bg-slate-800 flex-shrink-0">
         <div className="p-3 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Notizbücher</span>
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{t.notes_notebooks}</span>
           <button onClick={addNotebook} className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400" title="Neu">
             <Plus size={15} />
           </button>
@@ -349,13 +351,13 @@ export default function NotesPage() {
             onClick={() => { setImportError(''); fileInputRef.current?.click(); }}
             className="w-full flex items-center gap-2 px-3 py-2 text-xs text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/40 transition font-medium"
           >
-            <Upload size={13} /> OneNote importieren
+            <Upload size={13} /> {t.notes_import}
           </button>
           <button
             onClick={addSection}
             className="w-full flex items-center gap-2 px-3 py-2 text-xs text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition"
           >
-            <Plus size={13} /> Abschnitt
+            <Plus size={13} /> {t.notes_add_section}
           </button>
         </div>
       </div>
@@ -410,10 +412,10 @@ export default function NotesPage() {
             value={pageTitle}
             onChange={e => setPageTitle(e.target.value)}
             onBlur={handleTitleBlur}
-            placeholder="Seitentitel..."
+            placeholder={t.notes_title_placeholder}
             className="w-full text-3xl font-bold text-slate-900 dark:text-slate-100 border-none outline-none bg-transparent placeholder-slate-300 dark:placeholder-slate-600"
           />
-          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Zuletzt bearbeitet: {selPage.updatedAt}</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{t.notes_last_edited} {selPage.updatedAt}</p>
         </div>
 
         <div className="px-6 py-2 border-y border-slate-100 dark:border-slate-700 flex items-center gap-1 flex-wrap">

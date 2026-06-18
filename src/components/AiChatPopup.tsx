@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Sparkles, X, Send, Loader2, RotateCcw, Minimize2 } from 'lucide-react';
 import { chat } from '../services/aiService';
+import { useLanguage } from '../LanguageContext';
 
 interface Msg {
   role: 'user' | 'assistant';
@@ -23,6 +24,7 @@ function loadMsgs(): Msg[] {
 }
 
 export default function AiChatPopup() {
+  const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const [msgs, setMsgs] = useState<Msg[]>(loadMsgs);
   const [input, setInput] = useState('');
@@ -35,7 +37,6 @@ export default function AiChatPopup() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [msgs, loading]);
 
-  // Persist chat history so it survives page switches and reloads
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(msgs));
   }, [msgs]);
@@ -64,49 +65,41 @@ export default function AiChatPopup() {
 
   return (
     <>
-      {/* Floating button */}
       <button
         onClick={() => setOpen(o => !o)}
         className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 ${
-          open
-            ? 'bg-slate-700 hover:bg-slate-800'
-            : 'bg-blue-500 hover:bg-blue-600 hover:scale-110'
+          open ? 'bg-slate-700 hover:bg-slate-800' : 'bg-blue-500 hover:bg-blue-600 hover:scale-110'
         }`}
       >
         {open ? <X size={22} className="text-white" /> : <Sparkles size={22} className="text-white" />}
       </button>
 
-      {/* Chat popup */}
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-80 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col bg-white dark:bg-slate-800 overflow-hidden"
-          style={{ height: '460px' }}>
-
-          {/* Header */}
+        <div
+          className="fixed bottom-24 right-6 z-50 w-80 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col bg-white dark:bg-slate-800 overflow-hidden"
+          style={{ height: '460px' }}
+        >
           <div className="px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2">
               <Sparkles size={16} className="text-white opacity-90" />
-              <span className="text-white font-semibold text-sm">KI-Assistent</span>
+              <span className="text-white font-semibold text-sm">{t.ai_assistant}</span>
             </div>
             <div className="flex items-center gap-1">
               {msgs.length > 0 && (
                 <button
                   onClick={() => { setMsgs([]); setError(''); }}
-                  title="Gespräch zurücksetzen"
+                  title={t.popup_reset}
                   className="p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition"
                 >
                   <RotateCcw size={14} />
                 </button>
               )}
-              <button
-                onClick={() => setOpen(false)}
-                className="p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition"
-              >
+              <button onClick={() => setOpen(false)} className="p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition">
                 <Minimize2 size={14} />
               </button>
             </div>
           </div>
 
-          {/* Messages */}
           <div className="flex-1 overflow-y-auto px-3 py-3 space-y-2">
             {msgs.length === 0 && !loading && (
               <div className="flex flex-col items-center justify-center h-full text-center gap-3 pb-4">
@@ -114,11 +107,11 @@ export default function AiChatPopup() {
                   <Sparkles size={22} className="text-blue-400 dark:text-blue-300" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Wie kann ich helfen?</p>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Stell mir eine Frage zu deinen Notizen oder zum Lernstoff.</p>
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{t.popup_how_help}</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{t.popup_desc}</p>
                 </div>
                 <div className="flex flex-col gap-1.5 w-full mt-1">
-                  {['Erkläre mir dieses Konzept...', 'Erstelle Prüfungsfragen zu...', 'Fasse zusammen...'].map(s => (
+                  {t.popup_prompts.map(s => (
                     <button
                       key={s}
                       onClick={() => setInput(s)}
@@ -147,19 +140,15 @@ export default function AiChatPopup() {
               <div className="flex justify-start">
                 <div className="bg-slate-100 dark:bg-slate-700 rounded-2xl rounded-bl-sm px-3 py-2 flex items-center gap-1.5">
                   <Loader2 size={13} className="animate-spin text-slate-400 dark:text-slate-500" />
-                  <span className="text-xs text-slate-400 dark:text-slate-500">Antwortet...</span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500">{t.popup_answering}</span>
                 </div>
               </div>
             )}
 
-            {error && (
-              <div className="text-xs text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2">{error}</div>
-            )}
-
+            {error && <div className="text-xs text-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2">{error}</div>}
             <div ref={bottomRef} />
           </div>
 
-          {/* Input */}
           <div className="px-3 pb-3 pt-2 border-t border-slate-100 dark:border-slate-700 flex-shrink-0">
             <div className="flex gap-2 items-end">
               <input
@@ -167,7 +156,7 @@ export default function AiChatPopup() {
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
-                placeholder="Nachricht eingeben..."
+                placeholder={t.popup_placeholder}
                 disabled={loading}
                 className="flex-1 text-sm px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 resize-none"
               />
