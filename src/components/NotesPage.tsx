@@ -3,7 +3,7 @@ import {
   BookOpen, Plus, Trash2, Bold, Italic, Underline, Strikethrough,
   List, ListOrdered, Type, ChevronRight, FileText, Upload,
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
-  Undo2, Redo2, Highlighter,
+  Undo2, Redo2, Highlighter, Save, Check, Pencil,
 } from 'lucide-react';
 import mammoth from 'mammoth';
 import { useLanguage } from '../LanguageContext';
@@ -117,6 +117,9 @@ export default function NotesPage() {
   const [pageTitle, setPageTitle] = useState(selPage.title);
   const [importError, setImportError] = useState('');
   const [colorPickerOpen, setColorPickerOpen] = useState<'text' | 'highlight' | null>(null);
+  const [saved, setSaved] = useState(false);
+  const [renamingPageId, setRenamingPageId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState('');
   const editorRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -152,6 +155,38 @@ export default function NotesPage() {
   const handleTitleBlur = () => {
     syncPage({ title: pageTitle });
     setSelPage(p => ({ ...p, title: pageTitle }));
+  };
+
+  const handleSave = () => {
+    syncPage({ title: pageTitle, content: editorRef.current?.innerHTML ?? '' });
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  const startRename = (pg: Page, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setRenamingPageId(pg.id);
+    setRenameValue(pg.title);
+  };
+
+  const commitRename = (pgId: string) => {
+    const title = renameValue.trim() || 'Neue Seite';
+    setNotebooks(prev => prev.map(nb =>
+      nb.id !== selNb.id ? nb : {
+        ...nb,
+        sections: nb.sections.map(sec =>
+          sec.id !== selSec.id ? sec : {
+            ...sec,
+            pages: sec.pages.map(pg => pg.id !== pgId ? pg : { ...pg, title }),
+          }
+        ),
+      }
+    ));
+    if (pgId === selPage.id) {
+      setPageTitle(title);
+      setSelPage(p => ({ ...p, title }));
+    }
+    setRenamingPageId(null);
   };
 
   const handleEditorInput = () => {
@@ -383,22 +418,34 @@ export default function NotesPage() {
           {selSec.pages.map(pg => (
             <div
               key={pg.id}
-              onClick={() => selectPage(pg)}
-              className={`group flex items-center px-3 py-2 cursor-pointer transition-colors ${
+              onClick={() => renamingPageId !== pg.id && selectPage(pg)}
+              className={`group flex items-center px-2 py-1.5 cursor-pointer transition-colors ${
                 selPage.id === pg.id
                   ? 'bg-blue-50 dark:bg-blue-900/30 border-l-2 border-blue-500'
                   : 'hover:bg-slate-50 dark:hover:bg-slate-800 border-l-2 border-transparent'
               }`}
             >
-              <FileText size={12} className="text-slate-400 flex-shrink-0 mr-2" />
-              <span className="text-xs text-slate-700 dark:text-slate-300 flex-1 truncate">{pg.title}</span>
-              {selSec.pages.length > 1 && (
-                <button
-                  onClick={e => { e.stopPropagation(); deletePage(pg.id); }}
-                  className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:text-red-500 text-slate-400 transition"
-                >
-                  <Trash2 size={11} />
-                </button>
+              <FileText size={12} className="text-slate-400 flex-shrink-0 mr-1.5" />
+              {renamingPageId === pg.id ? (
+                <input
+                  autoFocus
+                  value={renameValue}
+                  onChange={e => setRenameValue(e.target.value)}
+                  onBlur={() => commitRename(pg.id)}
+                  onKeyDown={e => { if (e.key === 'Enter') commitRename(pg.id); if (e.key === 'Escape') setRenamingPageId(null); }}
+                  onClick={e => e.stopPropagation()}
+                  className="flex-1 text-xs border border-blue-400 rounded px-1 py-0.5 outline-none bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 min-w-0"
+                />
+              ) : (
+                <>
+                  <span className="text-xs text-slate-700 dark:text-slate-300 flex-1 truncate">{pg.title}</span>
+                  <div className="opacity-0 group-hover:opacity-100 flex items-center gap-0.5">
+                    <button onClick={e => startRename(pg, e)} className="p-0.5 rounded hover:text-blue-500 text-slate-400 transition"><Pencil size={10} /></button>
+                    {selSec.pages.length > 1 && (
+                      <button onClick={e => { e.stopPropagation(); deletePage(pg.id); }} className="p-0.5 rounded hover:text-red-500 text-slate-400 transition"><Trash2 size={10} /></button>
+                    )}
+                  </div>
+                </>
               )}
             </div>
           ))}
@@ -407,10 +454,22 @@ export default function NotesPage() {
 
       {/* Editor */}
       <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-slate-900">
-        <div className="px-6 pt-4 pb-2 flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
-          <span>{selNb.name}</span>
-          <ChevronRight size={12} />
-          <span>{selSec.name}</span>
+        <div className="px-6 pt-4 pb-2 flex items-center justify-between">
+          <div className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
+            <span>{selNb.name}</span>
+            <ChevronRight size={12} />
+            <span>{selSec.name}</span>
+          </div>
+          <button
+            onClick={handleSave}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+              saved
+                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                : 'bg-blue-500 hover:bg-blue-600 text-white'
+            }`}
+          >
+            {saved ? <><Check size={13} /> Gespeichert</> : <><Save size={13} /> Speichern</>}
+          </button>
         </div>
 
         <div className="px-6 pb-2">
