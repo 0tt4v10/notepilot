@@ -76,7 +76,7 @@ export default function ChatAssistant() {
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-white dark:bg-slate-900">
+    <div className="flex-1 flex flex-col bg-white dark:bg-slate-900 min-h-0 h-0">
       <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 shadow">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
