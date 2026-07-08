@@ -72,7 +72,15 @@ export async function chat(
 ): Promise<string> {
   const notesContext = getUserNotesContext();
   const system = notesContext
-    ? `${BASE_SYSTEM}\n\nHier sind die Notizen des Nutzers – nutze sie als Wissensgrundlage für deine Antworten:\n\n${notesContext}`
+    ? `${BASE_SYSTEM}
+
+WICHTIG: Du hast Zugriff auf die echten Notizen des Nutzers (unten aufgelistet).
+- Wenn der Nutzer fragt was in seinen Notizen steht, zitiere NUR den tatsächlichen Inhalt – erfinde NICHTS dazu.
+- Wenn eine Notiz leer oder kurz ist, sage das ehrlich.
+- Ergänze eigenes Wissen nur wenn der Nutzer explizit darum bittet (z.B. "Erkläre mir das Thema").
+
+Notizen des Nutzers:
+${notesContext}`
     : BASE_SYSTEM;
   return callClaude(messages, system);
 }
