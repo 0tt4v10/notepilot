@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Settings as SettingsIcon, Bell, Moon, Volume2, Save, Type } from 'lucide-react';
 import { useLanguage } from '../LanguageContext';
 import { Language } from '../i18n';
-import type { AccentColor, FontSize } from '../App';
+import type { FontSize } from '../App';
 
 interface SettingsState {
   notifications: boolean;
@@ -15,8 +15,6 @@ interface Props {
   onToggleDarkMode: () => void;
   language: Language;
   onLanguageChange: (lang: Language) => void;
-  accentColor: AccentColor;
-  onAccentColorChange: (c: AccentColor) => void;
   fontSize: FontSize;
   onFontSizeChange: (s: FontSize) => void;
 }
@@ -35,7 +33,7 @@ const FONT_SIZES: { value: FontSize; label: string }[] = [
   { value: 'lg', label: 'Gross' },
 ];
 
-export default function SettingsPage({ darkMode, onToggleDarkMode, language, onLanguageChange, accentColor, onAccentColorChange, fontSize, onFontSizeChange }: Props) {
+export default function SettingsPage({ darkMode, onToggleDarkMode, language, onLanguageChange, fontSize, onFontSizeChange }: Props) {
   const { t } = useLanguage();
   const [settings, setSettings] = useState<SettingsState>({
     notifications: true,
