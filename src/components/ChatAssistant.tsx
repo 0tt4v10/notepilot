@@ -61,7 +61,7 @@ export default function ChatAssistant() {
     setError('');
 
     try {
-      const reply = await chat('', nextMessages.map(m => ({ role: m.sender, content: m.text })));
+      const reply = await chat(nextMessages.map(m => ({ role: m.sender, content: m.text })));
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         text: reply,

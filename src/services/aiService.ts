@@ -21,6 +21,31 @@ async function callClaude(
 const BASE_SYSTEM = `Du bist NotePilot, ein intelligenter Lernassistent für Schweizer Schüler.
 Antworte präzise, lernförderlich und auf der Sprache des Nutzers.`;
 
+export function getUserNotesContext(): string {
+  try {
+    const raw = localStorage.getItem('notepilot-notebooks');
+    if (!raw) return '';
+    const notebooks = JSON.parse(raw) as {
+      name: string;
+      sections: { name: string; pages: { title: string; content: string }[] }[];
+    }[];
+    const parts: string[] = [];
+    for (const nb of notebooks) {
+      for (const sec of nb.sections) {
+        for (const pg of sec.pages) {
+          const text = pg.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+          if (text.length > 10) {
+            parts.push(`[${nb.name} › ${sec.name} › ${pg.title}]\n${text.slice(0, 1500)}`);
+          }
+        }
+      }
+    }
+    return parts.slice(0, 10).join('\n\n');
+  } catch {
+    return '';
+  }
+}
+
 export async function summarize(noteText: string): Promise<string> {
   return callClaude(
     [{ role: 'user', content: `Fasse diese Notiz klar und strukturiert zusammen. Verwende Stichpunkte:\n\n${noteText}` }],
@@ -43,11 +68,11 @@ export async function findGaps(noteText: string): Promise<string> {
 }
 
 export async function chat(
-  noteText: string,
   messages: { role: 'user' | 'assistant'; content: string }[]
 ): Promise<string> {
-  const system = noteText.trim()
-    ? `${BASE_SYSTEM}\n\nDer Nutzer hat folgende Notiz geöffnet – beziehe deine Antworten darauf:\n\n${noteText.slice(0, 4000)}`
+  const notesContext = getUserNotesContext();
+  const system = notesContext
+    ? `${BASE_SYSTEM}\n\nHier sind die Notizen des Nutzers – nutze sie als Wissensgrundlage für deine Antworten:\n\n${notesContext}`
     : BASE_SYSTEM;
   return callClaude(messages, system);
 }

@@ -54,7 +54,7 @@ export default function AiChatPopup() {
     setLoading(true);
     setError('');
     try {
-      const reply = await chat('', next);
+      const reply = await chat(next);
       setMsgs(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Fehler');
