@@ -34,13 +34,12 @@ export function getUserNotesContext(): string {
       for (const sec of nb.sections) {
         for (const pg of sec.pages) {
           const text = pg.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-          if (text.length > 10) {
-            parts.push(`[${nb.name} › ${sec.name} › ${pg.title}]\n${text.slice(0, 1500)}`);
-          }
+          const label = `[${nb.name} › ${sec.name} › ${pg.title}]`;
+          parts.push(text ? `${label}\n${text.slice(0, 1500)}` : `${label}\n(leer)`);
         }
       }
     }
-    return parts.slice(0, 10).join('\n\n');
+    return parts.slice(0, 15).join('\n\n');
   } catch {
     return '';
   }
