@@ -372,6 +372,7 @@ export default function NotesPage() {
     }
 
     // .docx
+    if (file.name.match(/\.docx$/i)) {
       try {
         const result = await mammoth.convertToHtml({ arrayBuffer: await file.arrayBuffer() });
         createNoteFromImport(file.name.replace(/\.docx$/i, ''), result.value, file.name);
