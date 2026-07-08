@@ -231,7 +231,33 @@ export default function NotesPage() {
       ...nb, sections: nb.sections.map(sec => sec.id !== selSec.id ? sec : { ...sec, pages })
     }));
     setSelSec(s => ({ ...s, pages }));
-    selectPage(pages[0]);
+    if (selPage.id === pageId) selectPage(pages[0]);
+  };
+  const deleteSection = (secId: string, nbId: string) => {
+    const nb = notebooks.find(n => n.id === nbId);
+    if (!nb || nb.sections.length <= 1) return;
+    const sections = nb.sections.filter(s => s.id !== secId);
+    setNotebooks(prev => prev.map(n => n.id !== nbId ? n : { ...n, sections }));
+    if (selSec.id === secId) {
+      const newSec = sections[0];
+      setSelNb(n => ({ ...n, sections }));
+      setSelSec(newSec);
+      const pg = newSec.pages[0];
+      setSelPage(pg); setPageTitle(pg.title);
+      if (editorRef.current) editorRef.current.innerHTML = pg.content;
+    }
+  };
+  const deleteNotebook = (nbId: string) => {
+    if (notebooks.length <= 1) return;
+    const updated = notebooks.filter(n => n.id !== nbId);
+    setNotebooks(updated);
+    if (selNb.id === nbId) {
+      const nb = updated[0];
+      const sec = nb.sections[0];
+      const pg = sec.pages[0];
+      setSelNb(nb); setSelSec(sec); setSelPage(pg); setPageTitle(pg.title);
+      if (editorRef.current) editorRef.current.innerHTML = pg.content;
+    }
   };
 
   // ── Drag & Drop: Pages ──
@@ -429,8 +455,14 @@ export default function NotesPage() {
                 ) : (
                   <>
                     <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate flex-1">{nb.name}</span>
-                    <button onClick={() => { setRenamingNbId(nb.id); setRenameValue(nb.name); }}
-                      className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:text-blue-500 text-slate-400 transition flex-shrink-0"><Pencil size={10} /></button>
+                    <div className="opacity-0 group-hover:opacity-100 flex items-center gap-0.5 flex-shrink-0">
+                      <button onClick={() => { setRenamingNbId(nb.id); setRenameValue(nb.name); }}
+                        className="p-0.5 rounded hover:text-blue-500 text-slate-400 transition"><Pencil size={10} /></button>
+                      {notebooks.length > 1 && (
+                        <button onClick={() => { if (window.confirm(`Notizbuch "${nb.name}" löschen?`)) deleteNotebook(nb.id); }}
+                          className="p-0.5 rounded hover:text-red-500 text-slate-400 transition"><Trash2 size={10} /></button>
+                      )}
+                    </div>
                   </>
                 )}
               </div>
@@ -465,8 +497,14 @@ export default function NotesPage() {
                   ) : (
                     <>
                       <span className="text-xs truncate flex-1">{sec.name}</span>
-                      <button onClick={e => { e.stopPropagation(); setRenamingSecId(sec.id); setRenameValue(sec.name); }}
-                        className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:text-blue-500 text-slate-400 transition flex-shrink-0"><Pencil size={10} /></button>
+                      <div className="opacity-0 group-hover:opacity-100 flex items-center gap-0.5 flex-shrink-0">
+                        <button onClick={e => { e.stopPropagation(); setRenamingSecId(sec.id); setRenameValue(sec.name); }}
+                          className="p-0.5 rounded hover:text-blue-500 text-slate-400 transition"><Pencil size={10} /></button>
+                        {nb.sections.length > 1 && (
+                          <button onClick={e => { e.stopPropagation(); if (window.confirm(`Abschnitt "${sec.name}" löschen?`)) deleteSection(sec.id, nb.id); }}
+                            className="p-0.5 rounded hover:text-red-500 text-slate-400 transition"><Trash2 size={10} /></button>
+                        )}
+                      </div>
                     </>
                   )}
                 </div>
