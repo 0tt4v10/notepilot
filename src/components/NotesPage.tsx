@@ -3,7 +3,7 @@ import {
   BookOpen, Plus, Trash2, Bold, Italic, Underline, Strikethrough,
   List, ListOrdered, Type, ChevronRight, FileText, Upload,
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
-  Undo2, Redo2, Highlighter, Save, Check, Pencil, GripVertical,
+  Undo2, Redo2, Highlighter, Save, Check, Pencil, GripVertical, HelpCircle, X,
 } from 'lucide-react';
 import mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -102,6 +102,7 @@ export default function NotesPage() {
   const [selPage, setSelPage] = useState<Page>(notebooks[0].sections[0].pages[0]);
   const [pageTitle, setPageTitle] = useState(selPage.title);
   const [importError, setImportError] = useState('');
+  const [showImportHelp, setShowImportHelp] = useState(false);
   const [colorPickerOpen, setColorPickerOpen] = useState<'text' | 'highlight' | null>(null);
   const [saved, setSaved] = useState(false);
 
@@ -475,10 +476,45 @@ export default function NotesPage() {
 
         <div className="p-2 border-t border-slate-200 dark:border-slate-700 space-y-1">
           {importError && <div className="text-xs text-red-600 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg px-2 py-1.5 leading-snug">{importError}</div>}
-          <button onClick={() => { setImportError(''); fileInputRef.current?.click(); }}
-            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/40 transition font-medium">
-            <Upload size={13} /> {t.notes_import}
-          </button>
+
+          {showImportHelp && (
+            <div className="bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg p-3 text-xs space-y-2">
+              <div className="flex items-center justify-between mb-1">
+                <span className="font-semibold text-slate-700 dark:text-slate-200">Import-Hilfe</span>
+                <button onClick={() => setShowImportHelp(false)} className="text-slate-400 hover:text-slate-600"><X size={13} /></button>
+              </div>
+              <div>
+                <p className="font-medium text-green-700 dark:text-green-400 mb-1">✓ Funktioniert:</p>
+                <ul className="space-y-1 text-slate-600 dark:text-slate-300">
+                  <li><b>.docx</b> — Word (empfohlen für OneNote)</li>
+                  <li><b>.txt</b> — Einfacher Text</li>
+                  <li><b>.html</b> — Webseiten</li>
+                </ul>
+              </div>
+              <div>
+                <p className="font-medium text-red-600 dark:text-red-400 mb-1">✗ Funktioniert nicht:</p>
+                <ul className="space-y-1 text-slate-600 dark:text-slate-300">
+                  <li><b>.pdf</b> — OneNote-PDFs haben keinen lesbaren Text</li>
+                </ul>
+              </div>
+              <div className="pt-1 border-t border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400">
+                <p className="font-medium mb-1">OneNote exportieren:</p>
+                <p>Datei → Exportieren → Seite → <b>Word (.docx)</b></p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-1">
+            <button onClick={() => { setImportError(''); fileInputRef.current?.click(); }}
+              className="flex-1 flex items-center gap-2 px-3 py-2 text-xs text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/40 transition font-medium">
+              <Upload size={13} /> {t.notes_import}
+            </button>
+            <button onClick={() => setShowImportHelp(h => !h)}
+              title="Import-Hilfe"
+              className={`px-2 py-2 rounded-lg border transition text-xs ${showImportHelp ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-700 text-blue-600 dark:text-blue-300' : 'border-slate-200 dark:border-slate-600 text-slate-400 hover:text-blue-500 hover:border-blue-300'}`}>
+              <HelpCircle size={13} />
+            </button>
+          </div>
           <button onClick={addSection}
             className="w-full flex items-center gap-2 px-3 py-2 text-xs text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
             <Plus size={13} /> {t.notes_add_section}
