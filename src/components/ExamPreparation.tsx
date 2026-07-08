@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BookOpen, Plus, Trash2, CheckCircle, Clock } from 'lucide-react';
 import { useLanguage } from '../LanguageContext';
 
@@ -10,15 +10,29 @@ interface Topic {
   dueDate: string;
 }
 
+const DEFAULT_TOPICS: Topic[] = [
+  { id: '1', name: 'Analytische Geometrie', progress: 65, completed: false, dueDate: '2026-05-20' },
+  { id: '2', name: 'Integralrechnung', progress: 40, completed: false, dueDate: '2026-05-22' },
+  { id: '3', name: 'Wahrscheinlichkeitstheorie', progress: 80, completed: true, dueDate: '2026-05-18' },
+  { id: '4', name: 'Lineare Algebra', progress: 55, completed: false, dueDate: '2026-05-25' },
+];
+
 export default function ExamPreparation() {
   const { t } = useLanguage();
-  const [topics, setTopics] = useState<Topic[]>([
-    { id: '1', name: 'Analytische Geometrie', progress: 65, completed: false, dueDate: '2026-05-20' },
-    { id: '2', name: 'Integralrechnung', progress: 40, completed: false, dueDate: '2026-05-22' },
-    { id: '3', name: 'Wahrscheinlichkeitstheorie', progress: 80, completed: true, dueDate: '2026-05-18' },
-    { id: '4', name: 'Lineare Algebra', progress: 55, completed: false, dueDate: '2026-05-25' },
-  ]);
+  const [topics, setTopics] = useState<Topic[]>(() => {
+    try {
+      const username = localStorage.getItem('username') ?? '';
+      const raw = localStorage.getItem(`notepilot-topics-${username}`);
+      if (raw) { const p = JSON.parse(raw); if (Array.isArray(p) && p.length > 0) return p; }
+    } catch { /* ignore */ }
+    return DEFAULT_TOPICS;
+  });
   const [newTopic, setNewTopic] = useState('');
+
+  useEffect(() => {
+    const username = localStorage.getItem('username') ?? '';
+    localStorage.setItem(`notepilot-topics-${username}`, JSON.stringify(topics));
+  }, [topics]);
 
   const addTopic = () => {
     if (!newTopic.trim()) return;
