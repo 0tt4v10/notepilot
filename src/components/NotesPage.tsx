@@ -6,6 +6,8 @@ import {
   Undo2, Redo2, Highlighter, Save, Check, Pencil, GripVertical,
 } from 'lucide-react';
 import mammoth from 'mammoth';
+import * as pdfjsLib from 'pdfjs-dist';
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
 import { useLanguage } from '../LanguageContext';
 
 interface Page {
@@ -349,7 +351,26 @@ export default function NotesPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     setImportError(''); e.target.value = '';
-    if (file.name.match(/\.docx$/i)) {
+    // .pdf
+    if (file.name.match(/\.pdf$/i)) {
+      try {
+        const buffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+        const pages: string[] = [];
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          pages.push(content.items.map((it: any) => it.str).join(' '));
+        }
+        const html = pages.map((p, i) => `<p><b>Seite ${i + 1}</b></p><p>${p}</p>`).join('<hr>');
+        createNoteFromImport(file.name.replace(/\.pdf$/i, ''), html, file.name);
+      } catch {
+        setImportError('Die PDF-Datei konnte nicht gelesen werden.');
+      }
+      return;
+    }
+
+    // .docx
       try {
         const result = await mammoth.convertToHtml({ arrayBuffer: await file.arrayBuffer() });
         createNoteFromImport(file.name.replace(/\.docx$/i, ''), result.value, file.name);
@@ -383,7 +404,7 @@ export default function NotesPage() {
 
   return (
     <div className="flex h-full bg-white dark:bg-slate-900" onClick={() => setColorPickerOpen(null)}>
-      <input ref={fileInputRef} type="file" accept=".docx,.html,.htm,.txt" className="hidden" onChange={handleImportFile} />
+      <input ref={fileInputRef} type="file" accept=".docx,.html,.htm,.txt,.pdf" className="hidden" onChange={handleImportFile} />
 
       {/* ── Notebooks panel ── */}
       <div className="w-52 border-r border-slate-200 dark:border-slate-700 flex flex-col bg-slate-50 dark:bg-slate-800 flex-shrink-0">
