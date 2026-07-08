@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { BookOpen, Plus, Trash2, CheckCircle, Clock } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { BookOpen, Plus, Trash2, CheckCircle, Clock, Pencil } from 'lucide-react';
 import { useLanguage } from '../LanguageContext';
 
 interface Topic {
@@ -28,6 +28,15 @@ export default function ExamPreparation() {
     return DEFAULT_TOPICS;
   });
   const [newTopic, setNewTopic] = useState('');
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState('');
+  const renameRef = useRef<HTMLInputElement>(null);
+
+  const commitRename = (id: string) => {
+    const name = renameValue.trim();
+    if (name) setTopics(prev => prev.map(t => t.id === id ? { ...t, name } : t));
+    setRenamingId(null);
+  };
 
   useEffect(() => {
     const username = localStorage.getItem('username') ?? '';
@@ -116,9 +125,27 @@ export default function ExamPreparation() {
                 </button>
 
                 <div className="flex-1">
-                  <h3 className={`font-semibold ${topic.completed ? 'line-through text-slate-400' : 'text-slate-900 dark:text-slate-100'}`}>
-                    {topic.name}
-                  </h3>
+                  {renamingId === topic.id ? (
+                    <input
+                      ref={renameRef}
+                      autoFocus
+                      value={renameValue}
+                      onChange={e => setRenameValue(e.target.value)}
+                      onBlur={() => commitRename(topic.id)}
+                      onKeyDown={e => { if (e.key === 'Enter') commitRename(topic.id); if (e.key === 'Escape') setRenamingId(null); }}
+                      className="font-semibold text-slate-900 dark:text-slate-100 border border-blue-400 rounded px-2 py-0.5 outline-none bg-white dark:bg-slate-700 w-full"
+                    />
+                  ) : (
+                    <div className="flex items-center gap-2 group/name">
+                      <h3 className={`font-semibold ${topic.completed ? 'line-through text-slate-400' : 'text-slate-900 dark:text-slate-100'}`}>
+                        {topic.name}
+                      </h3>
+                      <button onClick={() => { setRenamingId(topic.id); setRenameValue(topic.name); }}
+                        className="opacity-0 group-hover/name:opacity-100 p-0.5 rounded text-slate-400 hover:text-blue-500 transition">
+                        <Pencil size={13} />
+                      </button>
+                    </div>
+                  )}
                   <div className="flex items-center gap-4 mt-2">
                     <div className="flex-1">
                       <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-1">
