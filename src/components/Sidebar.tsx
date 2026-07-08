@@ -1,12 +1,14 @@
-import { TrendingUp, BookOpen, Settings as SettingsIcon, MessageCircle, PenLine } from 'lucide-react';
+import { TrendingUp, BookOpen, Settings as SettingsIcon, MessageCircle, PenLine, LogOut, User } from 'lucide-react';
 import { useLanguage } from '../LanguageContext';
 
 interface SidebarProps {
   currentPage: string;
   setCurrentPage: (page: any) => void;
+  username: string;
+  onLogout: () => void;
 }
 
-export default function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
+export default function Sidebar({ currentPage, setCurrentPage, username, onLogout }: SidebarProps) {
   const { t } = useLanguage();
 
   const menuItems = [
@@ -45,20 +47,24 @@ export default function Sidebar({ currentPage, setCurrentPage }: SidebarProps) {
         })}
       </nav>
 
-      <div className="p-4 border-t border-slate-200 dark:border-slate-700">
-        <div className="text-xs text-slate-500 dark:text-slate-400 text-center">
-          <p>NotePilot v1.0</p>
-          <a
-            href="https://github.com"
-            className="inline-flex items-center gap-1 mt-1.5 px-2 py-1 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors text-xs font-medium"
-            title="Browser-Extension für OneNote Web"
-            onClick={e => e.preventDefault()}
+      <div className="p-4 border-t border-slate-200 dark:border-slate-700 space-y-3">
+        {/* User info */}
+        <div className="flex items-center gap-3 px-2">
+          <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center flex-shrink-0">
+            <User size={15} className="text-blue-600 dark:text-blue-300" />
+          </div>
+          <span className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate flex-1">{username}</span>
+          <button
+            onClick={onLogout}
+            title="Abmelden"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition"
           >
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-            </svg>
-            Add-on
-          </a>
+            <LogOut size={15} />
+          </button>
+        </div>
+
+        <div className="text-xs text-slate-400 dark:text-slate-500 text-center">
+          <p>NotePilot v1.0</p>
         </div>
       </div>
     </aside>

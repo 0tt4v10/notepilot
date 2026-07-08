@@ -6,6 +6,7 @@ import Settings from './components/Settings';
 import ChatAssistant from './components/ChatAssistant';
 import NotesPage from './components/NotesPage';
 import AiChatPopup from './components/AiChatPopup';
+import LoginPage from './components/LoginPage';
 import { LanguageContext } from './LanguageContext';
 import { Language, translations } from './i18n';
 import './index.css';
@@ -14,6 +15,7 @@ type Page = 'notes' | 'dashboard' | 'exam' | 'settings' | 'chat';
 export type FontSize = 'sm' | 'md' | 'lg';
 
 function App() {
+  const [username, setUsername] = useState<string | null>(() => localStorage.getItem('username'));
   const [currentPage, setCurrentPage] = useState<Page>('notes');
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true');
   const [language, setLanguage] = useState<Language>(
@@ -26,6 +28,20 @@ function App() {
   useEffect(() => { localStorage.setItem('darkMode', String(darkMode)); }, [darkMode]);
   useEffect(() => { localStorage.setItem('language', language); }, [language]);
   useEffect(() => { localStorage.setItem('fontSize', fontSize); }, [fontSize]);
+
+  const handleLogin = (name: string) => {
+    localStorage.setItem('username', name);
+    setUsername(name);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('username');
+    setUsername(null);
+  };
+
+  if (!username) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
 
   const renderContent = () => {
     switch (currentPage) {
@@ -54,7 +70,7 @@ function App() {
         className={`flex h-screen bg-slate-50 dark:bg-slate-900 ${darkMode ? 'dark' : ''}`}
         data-fontsize={fontSize}
       >
-        <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
+        <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} username={username} onLogout={handleLogout} />
         <main className="flex-1 flex flex-col overflow-hidden">
           {renderContent()}
         </main>
