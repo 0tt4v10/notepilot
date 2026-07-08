@@ -45,7 +45,7 @@ function App() {
 
   const renderContent = () => {
     switch (currentPage) {
-      case 'notes':     return <NotesPage />;
+      case 'notes':     return <NotesPage username={username} />;
       case 'dashboard': return <Dashboard />;
       case 'exam':      return <ExamPreparation />;
       case 'settings':

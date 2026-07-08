@@ -23,7 +23,8 @@ Antworte präzise, lernförderlich und auf der Sprache des Nutzers.`;
 
 export function getUserNotesContext(): string {
   try {
-    const raw = localStorage.getItem('notepilot-notebooks');
+    const username = localStorage.getItem('username') ?? '';
+    const raw = localStorage.getItem(`notepilot-notebooks-${username}`);
     if (!raw) return '';
     const notebooks = JSON.parse(raw) as {
       name: string;

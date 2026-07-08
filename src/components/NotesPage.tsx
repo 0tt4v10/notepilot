@@ -54,11 +54,11 @@ const DEFAULT_NOTEBOOKS: Notebook[] = [
   },
 ];
 
-const STORAGE_KEY = 'notepilot-notebooks';
+function storageKey(username: string) { return `notepilot-notebooks-${username}`; }
 
-function loadNotebooks(): Notebook[] {
+function loadNotebooks(username: string): Notebook[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(storageKey(username));
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -94,9 +94,9 @@ function parseOneNoteHtml(html: string): { title: string; content: string } {
   return { title: title.trim(), content: doc.body?.innerHTML ?? html };
 }
 
-export default function NotesPage() {
+export default function NotesPage({ username }: { username: string }) {
   const { t } = useLanguage();
-  const [notebooks, setNotebooks] = useState<Notebook[]>(loadNotebooks);
+  const [notebooks, setNotebooks] = useState<Notebook[]>(() => loadNotebooks(username));
   const [selNb, setSelNb] = useState<Notebook>(notebooks[0]);
   const [selSec, setSelSec] = useState<Section>(notebooks[0].sections[0]);
   const [selPage, setSelPage] = useState<Page>(notebooks[0].sections[0].pages[0]);
@@ -125,8 +125,8 @@ export default function NotesPage() {
   }, [selPage.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(notebooks));
-  }, [notebooks]);
+    localStorage.setItem(storageKey(username), JSON.stringify(notebooks));
+  }, [notebooks, username]);
 
   const syncPage = useCallback((updates: Partial<Page>) => {
     setNotebooks(prev => prev.map(nb =>
