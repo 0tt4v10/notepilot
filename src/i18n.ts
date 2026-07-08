@@ -103,9 +103,9 @@ export const translations: Record<Language, Translations> = {
     dash_avg_grade: 'Durchschnittsnote',
     dash_study_hours: 'Lernstunden diese Woche',
     dash_weekly_chart: 'Wöchentlicher Fortschritt',
-    dash_subject_chart: 'Leistung nach Fach',
+    dash_subject_chart: 'Leistung nach Modul',
     dash_recent: 'Aktuelle Aktivitäten',
-    dash_subjects: ['Mathematik', 'Physik', 'Chemie', 'Biologie', 'Geschichte'],
+    dash_subjects: ['M 346', 'M 245', 'M 241', 'M 122', 'M 187'],
     dash_activities: [
       { action: 'Kapitel 5 abgeschlossen', time: 'vor 2 Stunden' },
       { action: 'Quiz bestanden: Mathematik', time: 'vor 4 Stunden' },
@@ -190,7 +190,7 @@ export const translations: Record<Language, Translations> = {
     dash_weekly_chart: 'Weekly Progress',
     dash_subject_chart: 'Performance by Subject',
     dash_recent: 'Recent Activity',
-    dash_subjects: ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'History'],
+    dash_subjects: ['M 346', 'M 245', 'M 241', 'M 122', 'M 187'],
     dash_activities: [
       { action: 'Chapter 5 completed', time: '2 hours ago' },
       { action: 'Quiz passed: Mathematics', time: '4 hours ago' },
@@ -275,7 +275,7 @@ export const translations: Record<Language, Translations> = {
     dash_weekly_chart: 'Progression hebdomadaire',
     dash_subject_chart: 'Performance par branche',
     dash_recent: 'Activités récentes',
-    dash_subjects: ['Mathématiques', 'Physique', 'Chimie', 'Biologie', 'Histoire'],
+    dash_subjects: ['M 346', 'M 245', 'M 241', 'M 122', 'M 187'],
     dash_activities: [
       { action: 'Chapitre 5 terminé', time: 'il y a 2 heures' },
       { action: 'Quiz réussi : Mathématiques', time: 'il y a 4 heures' },
@@ -360,7 +360,7 @@ export const translations: Record<Language, Translations> = {
     dash_weekly_chart: 'Progresso settimanale',
     dash_subject_chart: 'Rendimento per materia',
     dash_recent: 'Attività recenti',
-    dash_subjects: ['Matematica', 'Fisica', 'Chimica', 'Biologia', 'Storia'],
+    dash_subjects: ['M 346', 'M 245', 'M 241', 'M 122', 'M 187'],
     dash_activities: [
       { action: 'Capitolo 5 completato', time: '2 ore fa' },
       { action: 'Quiz superato: Matematica', time: '4 ore fa' },
