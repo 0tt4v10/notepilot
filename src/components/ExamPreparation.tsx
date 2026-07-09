@@ -17,12 +17,7 @@ interface Topic {
   goals: Goal[];
 }
 
-const DEFAULT_TOPICS: Topic[] = [
-  { id: '1', name: 'LB', progress: 65, completed: false, dueDate: '2026-05-20', goals: [] },
-  { id: '2', name: 'ZP', progress: 40, completed: false, dueDate: '2026-05-22', goals: [] },
-  { id: '3', name: 'ZP', progress: 80, completed: true, dueDate: '2026-05-18', goals: [] },
-  { id: '4', name: 'Projekt', progress: 55, completed: false, dueDate: '2026-05-25', goals: [] },
-];
+const DEFAULT_TOPICS: Topic[] = [];
 
 function getUsername() { return localStorage.getItem('username') ?? ''; }
 
@@ -122,10 +117,16 @@ export default function ExamPreparation() {
               <span>Fortschritt</span>
               <span>{openTopic.progress}%</span>
             </div>
-            <div className="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-2">
-              <div className={`h-2 rounded-full transition-all ${openTopic.completed ? 'bg-green-500' : 'bg-blue-500'}`}
-                style={{ width: `${openTopic.progress}%` }} />
-            </div>
+            {openTopic.goals.length > 0 ? (
+              <div className="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-2">
+                <div className={`h-2 rounded-full transition-all ${openTopic.completed ? 'bg-green-500' : 'bg-blue-500'}`}
+                  style={{ width: `${openTopic.progress}%` }} />
+              </div>
+            ) : (
+              <input type="range" min={0} max={100} value={openTopic.progress}
+                onChange={e => setTopics(prev => prev.map(t => t.id !== openTopic.id ? t : { ...t, progress: Number(e.target.value) }))}
+                className="w-full accent-blue-500" />
+            )}
             {openTopic.goals.length > 0 && (
               <p className="text-xs text-slate-400 mt-2">{doneGoals} von {openTopic.goals.length} Lernzielen erledigt</p>
             )}
