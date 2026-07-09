@@ -105,6 +105,7 @@ export default function NotesPage({ username }: { username: string }) {
   const [colorPickerOpen, setColorPickerOpen] = useState<'text' | 'highlight' | null>(null);
   const [saved, setSaved] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   // Rename state
   const [renamingPageId, setRenamingPageId] = useState<string | null>(null);
@@ -171,38 +172,41 @@ export default function NotesPage({ username }: { username: string }) {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const handleExportPdf = () => {
-    const content = editorRef.current?.innerHTML ?? '';
-    const win = window.open('', '_blank');
-    if (!win) return;
-    win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
-      <title>${pageTitle}</title>
-      <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 820px; margin: 48px auto; padding: 0 48px 64px; color: #1e293b; line-height: 1.7; }
-        .header { border-bottom: 2px solid #3b82f6; padding-bottom: 16px; margin-bottom: 32px; }
-        .header h1 { font-size: 26px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
-        .header .meta { font-size: 12px; color: #94a3b8; }
-        .header .logo { color: #3b82f6; font-weight: 700; font-size: 13px; }
-        h2 { font-size: 18px; font-weight: 600; color: #1e293b; margin: 28px 0 10px; }
-        h3 { font-size: 15px; font-weight: 600; color: #334155; margin: 20px 0 8px; }
-        p { margin: 8px 0; }
-        ul, ol { padding-left: 22px; margin: 8px 0; }
-        li { margin: 4px 0; }
-        b, strong { color: #0f172a; }
-        @media print { body { margin: 0; padding: 24px 40px 40px; } }
-      </style>
-    </head><body>
-      <div class="header">
-        <div class="logo">NotePilot</div>
-        <h1>${pageTitle}</h1>
-        <div class="meta">${selNb.name} &rsaquo; ${selSec.name} &nbsp;·&nbsp; ${selPage.updatedAt}</div>
+  const handleExportPdf = async () => {
+    setPdfLoading(true);
+    const { default: jsPDF } = await import('jspdf');
+    const { default: html2canvas } = await import('html2canvas');
+
+    const container = document.createElement('div');
+    container.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;padding:48px;background:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1e293b;line-height:1.7;font-size:14px;';
+    container.innerHTML = `
+      <div style="border-bottom:2px solid #3b82f6;padding-bottom:14px;margin-bottom:28px;">
+        <div style="color:#3b82f6;font-weight:700;font-size:12px;margin-bottom:6px;">NotePilot</div>
+        <h1 style="font-size:24px;font-weight:700;color:#0f172a;margin:0 0 6px;">${pageTitle}</h1>
+        <div style="font-size:12px;color:#94a3b8;">${selNb.name} › ${selSec.name} · ${selPage.updatedAt}</div>
       </div>
-      ${content}
-    </body></html>`);
-    win.document.close();
-    win.focus();
-    setTimeout(() => win.print(), 400);
+      <div style="font-size:14px;">${editorRef.current?.innerHTML ?? ''}</div>
+    `;
+    document.body.appendChild(container);
+
+    try {
+      const canvas = await html2canvas(container, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const imgH = (canvas.height * pageW) / canvas.width;
+      let y = 0;
+      while (y < imgH) {
+        pdf.addImage(imgData, 'PNG', 0, -y, pageW, imgH);
+        y += pageH;
+        if (y < imgH) pdf.addPage();
+      }
+      pdf.save(`${pageTitle || 'Notiz'}.pdf`);
+    } finally {
+      document.body.removeChild(container);
+      setPdfLoading(false);
+    }
   };
   const handleAiStructure = async () => {
     const raw = editorRef.current?.innerHTML ?? '';
@@ -709,9 +713,10 @@ export default function NotesPage({ username }: { username: string }) {
               {aiLoading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
               KI strukturieren
             </button>
-            <button onClick={handleExportPdf} title="Als PDF exportieren"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300">
-              <Download size={13} /> PDF
+            <button onClick={handleExportPdf} disabled={pdfLoading} title="Als PDF herunterladen"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 disabled:opacity-50">
+              {pdfLoading ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+              {pdfLoading ? 'Exportiere...' : 'PDF'}
             </button>
             <button onClick={handleSave} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
               saved ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-blue-500 hover:bg-blue-600 text-white'
