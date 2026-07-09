@@ -40,15 +40,12 @@ const COLORS = ['bg-blue-500', 'bg-purple-500', 'bg-green-500', 'bg-orange-500',
 const DEFAULT_NOTEBOOKS: Notebook[] = [
   {
     id: '1',
-    name: 'Mathematik',
+    name: 'Mein Notizbuch',
     sections: [
       {
-        id: 's1', name: 'Analysis', color: 'bg-blue-500',
+        id: 's1', name: 'Allgemein', color: 'bg-blue-500',
         pages: [
-          {
-            id: 'p1', title: 'Ableitungsregeln', updatedAt: '2026-05-07',
-            content: '<h2>Ableitungsregeln</h2><p>Die wichtigsten Ableitungsregeln:</p><ul><li><b>Potenzregel:</b> f(x) = xⁿ → f\'(x) = n·xⁿ⁻¹</li><li><b>Kettenregel:</b> (f∘g)\' = f\'(g(x))·g\'(x)</li><li><b>Produktregel:</b> (f·g)\' = f\'·g + f·g\'</li></ul>',
-          },
+          { id: 'p1', title: 'Neue Seite', updatedAt: new Date().toISOString().slice(0, 10), content: '' },
         ],
       },
     ],
