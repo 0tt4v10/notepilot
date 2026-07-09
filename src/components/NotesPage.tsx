@@ -119,6 +119,8 @@ export default function NotesPage({ username }: { username: string }) {
 
   const editorRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Prevent saving stale localStorage data to cloud before cloud load completes
+  const cloudLoadDone = useRef(false);
 
   useEffect(() => {
     if (editorRef.current) editorRef.current.innerHTML = selPage.content;
@@ -126,12 +128,13 @@ export default function NotesPage({ username }: { username: string }) {
 
   useEffect(() => {
     localStorage.setItem(storageKey(username), JSON.stringify(notebooks));
-    saveNotebooksToCloud(username, notebooks);
+    if (cloudLoadDone.current) saveNotebooksToCloud(username, notebooks);
   }, [notebooks, username]);
 
-  // Load from cloud on mount (overrides localStorage if cloud has data)
+  // Load from cloud on mount — cloud always wins over local cache
   useEffect(() => {
     loadNotebooksFromCloud(username).then(cloudData => {
+      cloudLoadDone.current = true;
       if (!cloudData || cloudData.length === 0) return;
       setNotebooks(cloudData);
       const nb = cloudData[0];
