@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { TrendingUp, BookOpen, Settings as SettingsIcon, MessageCircle, PenLine, LogOut, User, X, Shield, Info, Flame, Play, Pause, RotateCcw } from 'lucide-react';
+import { TrendingUp, BookOpen, Settings as SettingsIcon, MessageCircle, PenLine, LogOut, User, X, Shield, Info, Flame, Play, Pause, RotateCcw, Layers, Star } from 'lucide-react';
 import { useLanguage } from '../LanguageContext';
 
 interface SidebarProps {
@@ -28,6 +28,10 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   );
 }
 
+function getXp(username: string): number {
+  return parseInt(localStorage.getItem(`notepilot-xp-${username}`) ?? '0');
+}
+
 function getStreak(username: string): number {
   const key = `notepilot-streak-${username}`;
   const today = new Date().toISOString().slice(0, 10);
@@ -54,6 +58,17 @@ export default function Sidebar({ currentPage, setCurrentPage, username, onLogou
   const [showTech, setShowTech] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [streak] = useState(() => getStreak(username));
+  const [xp, setXp] = useState(() => getXp(username));
+
+  // Poll XP from localStorage so it updates after quiz
+  useEffect(() => {
+    const id = setInterval(() => setXp(getXp(username)), 2000);
+    return () => clearInterval(id);
+  }, [username]);
+
+  const level = Math.floor(xp / 200) + 1;
+  const xpInLevel = xp % 200;
+  const xpProgress = (xpInLevel / 200) * 100;
 
   // Pomodoro
   const [timeLeft, setTimeLeft] = useState(WORK_SEC);
@@ -92,6 +107,7 @@ export default function Sidebar({ currentPage, setCurrentPage, username, onLogou
     { id: 'notes', label: t.nav_notes, icon: PenLine },
     { id: 'dashboard', label: t.nav_dashboard, icon: TrendingUp },
     { id: 'exam', label: t.nav_exam, icon: BookOpen },
+    { id: 'learn', label: 'Lernen', icon: Layers },
     { id: 'chat', label: t.nav_chat, icon: MessageCircle },
     { id: 'settings', label: t.nav_settings, icon: SettingsIcon },
   ];
@@ -124,6 +140,18 @@ export default function Sidebar({ currentPage, setCurrentPage, username, onLogou
             );
           })}
         </nav>
+
+        {/* XP / Level */}
+        <div className="mx-4 mb-2 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl px-4 py-3">
+          <div className="flex items-center gap-2 mb-1.5">
+            <Star size={15} className="text-yellow-500 flex-shrink-0" />
+            <span className="text-sm font-bold text-yellow-600 dark:text-yellow-400">Level {level}</span>
+            <span className="text-xs text-yellow-400 dark:text-yellow-500 ml-auto">{xpInLevel}/200 XP</span>
+          </div>
+          <div className="w-full bg-yellow-200 dark:bg-yellow-900/40 rounded-full h-1.5">
+            <div className="h-1.5 rounded-full bg-yellow-400 transition-all" style={{ width: `${xpProgress}%` }} />
+          </div>
+        </div>
 
         {/* Streak */}
         <div className="mx-4 mb-3 bg-orange-50 dark:bg-orange-900/20 rounded-xl px-4 py-3 flex items-center gap-3">

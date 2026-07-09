@@ -67,6 +67,26 @@ export async function findGaps(noteText: string): Promise<string> {
   );
 }
 
+export async function generateFlashcards(notesText: string): Promise<{ front: string; back: string }[]> {
+  const result = await callClaude([{
+    role: 'user',
+    content: `Erstelle 6 Lernkarten aus diesen Notizen. Antworte NUR mit einem JSON-Array, kein Markdown:\n[{"front":"Begriff oder Frage","back":"Erklärung oder Antwort"},...]\n\nNotizen:\n${notesText}`,
+  }], BASE_SYSTEM);
+  try {
+    return JSON.parse(result.replace(/```json?|```/g, '').trim());
+  } catch { return []; }
+}
+
+export async function generateQuiz(notesText: string): Promise<{ question: string; options: string[]; correct: number }[]> {
+  const result = await callClaude([{
+    role: 'user',
+    content: `Erstelle 5 Multiple-Choice-Fragen aus diesen Notizen. Antworte NUR mit einem JSON-Array, kein Markdown:\n[{"question":"...","options":["A","B","C","D"],"correct":0},...]\n(correct = Index der richtigen Antwort, 0-basiert)\n\nNotizen:\n${notesText}`,
+  }], BASE_SYSTEM);
+  try {
+    return JSON.parse(result.replace(/```json?|```/g, '').trim());
+  } catch { return []; }
+}
+
 export async function chat(
   messages: { role: 'user' | 'assistant'; content: string }[]
 ): Promise<string> {

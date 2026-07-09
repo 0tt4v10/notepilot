@@ -5,13 +5,14 @@ import ExamPreparation from './components/ExamPreparation';
 import Settings from './components/Settings';
 import ChatAssistant from './components/ChatAssistant';
 import NotesPage from './components/NotesPage';
+import Flashcards from './components/Flashcards';
 import AiChatPopup from './components/AiChatPopup';
 import LoginPage from './components/LoginPage';
 import { LanguageContext } from './LanguageContext';
 import { Language, translations } from './i18n';
 import './index.css';
 
-type Page = 'notes' | 'dashboard' | 'exam' | 'settings' | 'chat';
+type Page = 'notes' | 'dashboard' | 'exam' | 'settings' | 'chat' | 'learn';
 export type FontSize = 'sm' | 'md' | 'lg';
 
 function App() {
@@ -59,8 +60,9 @@ function App() {
             onFontSizeChange={setFontSize}
           />
         );
+      case 'learn':   return <Flashcards username={username} />;
       case 'chat': return <ChatAssistant />;
-      default:     return <NotesPage />;
+      default:     return <NotesPage username={username} />;
     }
   };
 
