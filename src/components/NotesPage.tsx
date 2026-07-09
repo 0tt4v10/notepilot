@@ -6,6 +6,7 @@ import {
   Undo2, Redo2, Highlighter, Save, Check, Pencil, GripVertical, HelpCircle, X, Sparkles, Loader2,
 } from 'lucide-react';
 import { chat } from '../services/aiService';
+import { loadNotebooksFromCloud, saveNotebooksToCloud } from '../lib/supabase';
 import mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist';
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
@@ -125,7 +126,22 @@ export default function NotesPage({ username }: { username: string }) {
 
   useEffect(() => {
     localStorage.setItem(storageKey(username), JSON.stringify(notebooks));
+    saveNotebooksToCloud(username, notebooks);
   }, [notebooks, username]);
+
+  // Load from cloud on mount (overrides localStorage if cloud has data)
+  useEffect(() => {
+    loadNotebooksFromCloud(username).then(cloudData => {
+      if (!cloudData || cloudData.length === 0) return;
+      setNotebooks(cloudData);
+      const nb = cloudData[0];
+      const sec = nb.sections[0];
+      const pg = sec.pages[0];
+      setSelNb(nb); setSelSec(sec); setSelPage(pg); setPageTitle(pg.title);
+      if (editorRef.current) editorRef.current.innerHTML = pg.content;
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [username]);
 
   const syncPage = useCallback((updates: Partial<Page>) => {
     setNotebooks(prev => prev.map(nb =>
