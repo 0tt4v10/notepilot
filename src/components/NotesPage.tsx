@@ -3,7 +3,7 @@ import {
   BookOpen, Plus, Trash2, Bold, Italic, Underline, Strikethrough,
   List, ListOrdered, Type, ChevronRight, FileText, Upload,
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
-  Undo2, Redo2, Highlighter, Save, Check, Pencil, GripVertical, HelpCircle, X, Sparkles, Loader2,
+  Undo2, Redo2, Highlighter, Save, Check, Pencil, GripVertical, HelpCircle, X, Sparkles, Loader2, Download,
 } from 'lucide-react';
 import { chat } from '../services/aiService';
 import { loadNotebooksFromCloud, saveNotebooksToCloud } from '../lib/supabase';
@@ -169,6 +169,40 @@ export default function NotesPage({ username }: { username: string }) {
     syncPage({ title: pageTitle, content: editorRef.current?.innerHTML ?? '' });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+  };
+
+  const handleExportPdf = () => {
+    const content = editorRef.current?.innerHTML ?? '';
+    const win = window.open('', '_blank');
+    if (!win) return;
+    win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
+      <title>${pageTitle}</title>
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 820px; margin: 48px auto; padding: 0 48px 64px; color: #1e293b; line-height: 1.7; }
+        .header { border-bottom: 2px solid #3b82f6; padding-bottom: 16px; margin-bottom: 32px; }
+        .header h1 { font-size: 26px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+        .header .meta { font-size: 12px; color: #94a3b8; }
+        .header .logo { color: #3b82f6; font-weight: 700; font-size: 13px; }
+        h2 { font-size: 18px; font-weight: 600; color: #1e293b; margin: 28px 0 10px; }
+        h3 { font-size: 15px; font-weight: 600; color: #334155; margin: 20px 0 8px; }
+        p { margin: 8px 0; }
+        ul, ol { padding-left: 22px; margin: 8px 0; }
+        li { margin: 4px 0; }
+        b, strong { color: #0f172a; }
+        @media print { body { margin: 0; padding: 24px 40px 40px; } }
+      </style>
+    </head><body>
+      <div class="header">
+        <div class="logo">NotePilot</div>
+        <h1>${pageTitle}</h1>
+        <div class="meta">${selNb.name} &rsaquo; ${selSec.name} &nbsp;·&nbsp; ${selPage.updatedAt}</div>
+      </div>
+      ${content}
+    </body></html>`);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 400);
   };
   const handleAiStructure = async () => {
     const raw = editorRef.current?.innerHTML ?? '';
@@ -674,6 +708,10 @@ export default function NotesPage({ username }: { username: string }) {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition bg-purple-500 hover:bg-purple-600 disabled:opacity-50 text-white">
               {aiLoading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
               KI strukturieren
+            </button>
+            <button onClick={handleExportPdf} title="Als PDF exportieren"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300">
+              <Download size={13} /> PDF
             </button>
             <button onClick={handleSave} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
               saved ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-blue-500 hover:bg-blue-600 text-white'
