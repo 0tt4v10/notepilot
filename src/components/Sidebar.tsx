@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { TrendingUp, BookOpen, Settings as SettingsIcon, MessageCircle, PenLine, LogOut, User, X, Shield, Info } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { TrendingUp, BookOpen, Settings as SettingsIcon, MessageCircle, PenLine, LogOut, User, X, Shield, Info, Flame, Play, Pause, RotateCcw } from 'lucide-react';
 import { useLanguage } from '../LanguageContext';
 
 interface SidebarProps {
@@ -28,10 +28,65 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   );
 }
 
+function getStreak(username: string): number {
+  const key = `notepilot-streak-${username}`;
+  const today = new Date().toISOString().slice(0, 10);
+  try {
+    const raw = localStorage.getItem(key);
+    const data = raw ? JSON.parse(raw) : { count: 0, lastDate: '' };
+    if (data.lastDate === today) return data.count;
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    const newCount = data.lastDate === yesterday ? data.count + 1 : 1;
+    localStorage.setItem(key, JSON.stringify({ count: newCount, lastDate: today }));
+    return newCount;
+  } catch { return 1; }
+}
+
+const WORK_SEC = 25 * 60;
+const BREAK_SEC = 5 * 60;
+
+function fmt(s: number) {
+  return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+}
+
 export default function Sidebar({ currentPage, setCurrentPage, username, onLogout }: SidebarProps) {
   const { t } = useLanguage();
   const [showTech, setShowTech] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
+  const [streak] = useState(() => getStreak(username));
+
+  // Pomodoro
+  const [timeLeft, setTimeLeft] = useState(WORK_SEC);
+  const [running, setRunning] = useState(false);
+  const [isBreak, setIsBreak] = useState(false);
+  const isBreakRef = useRef(isBreak);
+  isBreakRef.current = isBreak;
+
+  useEffect(() => {
+    if (!running) return;
+    const id = setInterval(() => {
+      setTimeLeft(t => t - 1);
+    }, 1000);
+    return () => clearInterval(id);
+  }, [running]);
+
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      const next = !isBreakRef.current;
+      setIsBreak(next);
+      setTimeLeft(next ? BREAK_SEC : WORK_SEC);
+    }
+  }, [timeLeft]);
+
+  const resetTimer = () => {
+    setRunning(false);
+    setIsBreak(false);
+    setTimeLeft(WORK_SEC);
+  };
+
+  const progress = isBreak
+    ? ((BREAK_SEC - timeLeft) / BREAK_SEC) * 100
+    : ((WORK_SEC - timeLeft) / WORK_SEC) * 100;
 
   const menuItems = [
     { id: 'notes', label: t.nav_notes, icon: PenLine },
@@ -69,6 +124,66 @@ export default function Sidebar({ currentPage, setCurrentPage, username, onLogou
             );
           })}
         </nav>
+
+        {/* Streak */}
+        <div className="mx-4 mb-3 bg-orange-50 dark:bg-orange-900/20 rounded-xl px-4 py-3 flex items-center gap-3">
+          <Flame size={20} className="text-orange-500 flex-shrink-0" />
+          <div>
+            <p className="text-sm font-bold text-orange-600 dark:text-orange-400">{streak} {streak === 1 ? 'Tag' : 'Tage'} Serie</p>
+            <p className="text-xs text-orange-400 dark:text-orange-500">Jeden Tag weiterlernen!</p>
+          </div>
+        </div>
+
+        {/* Pomodoro */}
+        <div className="mx-4 mb-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl px-4 py-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+              {isBreak ? 'Pause' : 'Fokus'}
+            </span>
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+              isBreak ? 'bg-green-100 text-green-600 dark:bg-green-900/40 dark:text-green-400'
+                      : 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400'
+            }`}>
+              {isBreak ? '5 min' : '25 min'}
+            </span>
+          </div>
+
+          {/* Progress ring area */}
+          <div className="flex items-center gap-3">
+            <span className={`text-2xl font-mono font-bold ${
+              isBreak ? 'text-green-600 dark:text-green-400' : 'text-blue-600 dark:text-blue-400'
+            }`}>
+              {fmt(timeLeft)}
+            </span>
+            <div className="flex-1 bg-slate-200 dark:bg-slate-600 rounded-full h-1.5">
+              <div
+                className={`h-1.5 rounded-full transition-all ${isBreak ? 'bg-green-500' : 'bg-blue-500'}`}
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-2 mt-2">
+            <button
+              onClick={() => setRunning(r => !r)}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-sm font-medium transition ${
+                running
+                  ? 'bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-500'
+                  : 'bg-blue-500 text-white hover:bg-blue-600'
+              }`}
+            >
+              {running ? <Pause size={14} /> : <Play size={14} />}
+              {running ? 'Pause' : 'Start'}
+            </button>
+            <button
+              onClick={resetTimer}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 transition"
+              title="Zurücksetzen"
+            >
+              <RotateCcw size={14} />
+            </button>
+          </div>
+        </div>
 
         <div className="p-4 border-t border-slate-200 dark:border-slate-700 space-y-3">
           <div className="flex items-center gap-3 px-2">
@@ -125,7 +240,7 @@ export default function Sidebar({ currentPage, setCurrentPage, username, onLogou
               <p className="font-semibold text-slate-800 dark:text-slate-200 mb-1">Datenspeicherung</p>
               <ul className="space-y-0.5 text-slate-600 dark:text-slate-400">
                 <li>Alle Notizen bleiben lokal im Browser (localStorage)</li>
-                <li>Kein eigener Server, keine Datenbank</li>
+                <li>Cloud-Sync via Supabase für geräteübergreifenden Zugriff</li>
               </ul>
             </div>
             <div>
