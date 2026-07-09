@@ -3,8 +3,9 @@ import {
   BookOpen, Plus, Trash2, Bold, Italic, Underline, Strikethrough,
   List, ListOrdered, Type, ChevronRight, FileText, Upload,
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
-  Undo2, Redo2, Highlighter, Save, Check, Pencil, GripVertical, HelpCircle, X,
+  Undo2, Redo2, Highlighter, Save, Check, Pencil, GripVertical, HelpCircle, X, Sparkles, Loader2,
 } from 'lucide-react';
+import { chat } from '../services/aiService';
 import mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist';
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
@@ -105,6 +106,7 @@ export default function NotesPage({ username }: { username: string }) {
   const [showImportHelp, setShowImportHelp] = useState(false);
   const [colorPickerOpen, setColorPickerOpen] = useState<'text' | 'highlight' | null>(null);
   const [saved, setSaved] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
 
   // Rename state
   const [renamingPageId, setRenamingPageId] = useState<string | null>(null);
@@ -150,6 +152,24 @@ export default function NotesPage({ username }: { username: string }) {
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
+  const handleAiStructure = async () => {
+    const raw = editorRef.current?.innerHTML ?? '';
+    const text = raw.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!text) return;
+    setAiLoading(true);
+    try {
+      const result = await chat([{
+        role: 'user',
+        content: `Strukturiere diesen Text als saubere HTML-Notiz mit Überschriften (<h2>, <h3>), Aufzählungen (<ul><li>) und fetten Schlüsselbegriffen (<b>). Gib NUR den HTML-Inhalt zurück, kein Markdown, keine Erklärungen:\n\n${text}`
+      }]);
+      if (editorRef.current && result) {
+        editorRef.current.innerHTML = result.replace(/```html?|```/g, '').trim();
+        handleEditorInput();
+      }
+    } catch { /* ignore */ }
+    setAiLoading(false);
+  };
+
   const handleEditorInput = () => {
     const content = editorRef.current?.innerHTML ?? '';
     syncPage({ content });
@@ -630,11 +650,19 @@ export default function NotesPage({ username }: { username: string }) {
           <div className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
             <span>{selNb.name}</span><ChevronRight size={12} /><span>{selSec.name}</span>
           </div>
-          <button onClick={handleSave} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
-            saved ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-blue-500 hover:bg-blue-600 text-white'
-          }`}>
-            {saved ? <><Check size={13} /> Gespeichert</> : <><Save size={13} /> Speichern</>}
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={handleAiStructure} disabled={aiLoading}
+              title="Text mit KI strukturieren"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition bg-purple-500 hover:bg-purple-600 disabled:opacity-50 text-white">
+              {aiLoading ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
+              KI strukturieren
+            </button>
+            <button onClick={handleSave} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+              saved ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-blue-500 hover:bg-blue-600 text-white'
+            }`}>
+              {saved ? <><Check size={13} /> Gespeichert</> : <><Save size={13} /> Speichern</>}
+            </button>
+          </div>
         </div>
 
         <div className="px-6 pb-2">
