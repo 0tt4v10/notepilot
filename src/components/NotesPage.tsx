@@ -136,6 +136,8 @@ export default function NotesPage({ username }: { username: string }) {
     loadNotebooksFromCloud(username).then(cloudData => {
       cloudLoadDone.current = true;
       if (!cloudData || cloudData.length === 0) return;
+      // Write to localStorage immediately so aiService can read it right away
+      localStorage.setItem(storageKey(username), JSON.stringify(cloudData));
       setNotebooks(cloudData);
       const nb = cloudData[0];
       const sec = nb.sections[0];
